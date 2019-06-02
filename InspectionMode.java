@@ -714,8 +714,8 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 
 
 		//listener to add in functionality of adding a waypoint and adding to data structure for
-		//path execution
-		//listener to add in remove on click functionality and altitude control
+		//path execution, I think we don't need this part right?
+		//listener to add in remove on click functionality and altitude control, I think we don't need this part right?
 	}
 	private void refresh_markers() {
 		int i;
@@ -739,68 +739,10 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 
 		}
 
-		//Check markers
-		if (AC_DATA.NewMarkerAdded)   //Did we add any markers?
-		{
-			int AcInd;
-			for (AcInd = 0; AcInd <= AC_DATA.IndexEnd; AcInd++) {     //Search thru all aircrafts and check if they have marker added flag
+		//Check markers, I think we don't need this part right?
 
-				if (AC_DATA.AircraftData[AcInd].NewMarkerAdded) {   //Does this aircraft has an added marker data?
-					int MarkerInd = 1;
-					//Log.d("PPRZ_info", "trying to show ac markers of "+AcInd);
-					//Search aircraft markers which has name but doesn't have marker
-					for (MarkerInd = 1; (MarkerInd < AC_DATA.AircraftData[AcInd].NumbOfWps - 1); MarkerInd++) {
+		//Handle marker modified msg, I think we don't need this part right?
 
-						if ((AC_DATA.AircraftData[AcInd].AC_Markers[MarkerInd].WpPosition == null) || (AC_DATA.AircraftData[AcInd].AC_Markers[MarkerInd].WpMarker != null))
-							continue; //we dont have data for this wp yet
-
-						if (DEBUG) Log.d("PPRZ_info", "New marker added for Ac id: " + AcInd + " wpind:" + MarkerInd);
-
-						AC_DATA.AircraftData[AcInd].AC_Markers[MarkerInd].MarkerModified = false;
-					}
-
-
-					AC_DATA.AircraftData[AcInd].NewMarkerAdded = false;
-				}
-			}
-
-			AC_DATA.NewMarkerAdded = false;
-		}
-
-		//Handle marker modified msg
-		if (AC_DATA.MarkerModified)   //
-		{
-
-			int AcInd;
-			for (AcInd = 0; AcInd <= AC_DATA.IndexEnd; AcInd++) {     //Search thru all aircrafts and check if they have marker added flag
-
-				if (AC_DATA.AircraftData[AcInd].MarkerModified) {   //Does this aircraft has an added marker data?
-					if (DEBUG) Log.d("PPRZ_info", "Marker modified for AC= " + AcInd);
-					int MarkerInd = 1;
-					//if (DEBUG) Log.d("PPRZ_info", "trying to show ac markers of "+AcInd);
-					//Search aircraft markers which has name but doesn't have marker
-					for (MarkerInd = 1; (MarkerInd < AC_DATA.AircraftData[AcInd].NumbOfWps - 1); MarkerInd++) {
-						//Log.d("PPRZ_info", "Searching Marker for AC= " + AcInd + " wpind:" + MarkerInd);
-						if ((AC_DATA.AircraftData[AcInd].AC_Markers[MarkerInd] == null) || !(AC_DATA.AircraftData[AcInd].AC_Markers[MarkerInd].MarkerModified) || (null == AC_DATA.AircraftData[AcInd].AC_Markers[MarkerInd].WpMarker))
-							continue; //we dont have data for this wp yet
-
-						//Set new position for marker
-						AC_DATA.AircraftData[AcInd].AC_Markers[MarkerInd].WpMarker.setPosition(convert_to_lab(AC_DATA.AircraftData[AcInd].AC_Markers[MarkerInd].WpPosition));
-
-						//Clean MarkerModified flag
-						AC_DATA.AircraftData[AcInd].AC_Markers[MarkerInd].MarkerModified = false;
-						if (DEBUG) Log.d("PPRZ_info", "Marker modified for acid: " + AcInd + " wpind:" + MarkerInd);
-
-					}
-					//Clean AC MarkerModified flag
-					AC_DATA.AircraftData[AcInd].MarkerModified = false;
-
-				}
-			}
-			//Clean Class MarkerModified flag
-			AC_DATA.MarkerModified = false;
-
-		}
 
 		AC_DATA.ViewChanged = false;
 	}
