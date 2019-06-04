@@ -216,7 +216,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 	public void setup_app(){
 		AppPassword = "1234";
 
-		thumbPad_left = (RelativeLayout)findViewById(R.id.joystick_left);
+		//thumbPad_left = (RelativeLayout)findViewById(R.id.joystick_left);
 		thumbPad_right = (RelativeLayout)findViewById(R.id.joystick_right);
 		thumbPad_new = (RelativeLayout)findViewById(R.id.layout_joystick_left);
 

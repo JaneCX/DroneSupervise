@@ -65,6 +65,7 @@
 
 package com.PPRZonDroid;
 
+import android.view.ViewGroup.LayoutParams;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -86,8 +87,10 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -102,6 +105,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.NumberPicker;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -186,9 +190,9 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
   	private ImageView batteryLevelView;
 
 	private Button Button_ConnectToServer, Button_LaunchInspectionMode;
-  	public Button Button_Takeoff, Button_Execute, Button_Pause, Button_LandHere, map_swap;
+  	public Button Button_Takeoff, Button_Execute, Button_Pause, Button_LandHere, Button_Ready, Button_End, map_swap;
 
-  	private ToggleButton ChangeVisibleAcButon;
+  	private ToggleButton ChangeVisibleAcButton;
   	private DrawerLayout mDrawerLayout;
 
 	public int percent = 100;
@@ -325,15 +329,21 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 	  	Button_Execute = (Button) findViewById(R.id.execute_flightplan);
 	  	Button_Pause = (Button) findViewById(R.id.pause_flightplan);
 	  	Button_LandHere = (Button) findViewById(R.id.land_here);
+	  	Button_Ready = (Button) findViewById(R.id.ready);
+	  	Button_End = (Button) findViewById(R.id.end_activity);
         map_swap = (Button) findViewById(R.id.map_swap);
 
 	  	Button_Takeoff.setOnTouchListener(new View.OnTouchListener() {
 		  @Override
 		  public boolean onTouch(View v, MotionEvent event) {
 			  clear_buttons();
-			  if(event.getAction() == MotionEvent.ACTION_DOWN) logger.logEvent(AC_DATA.AircraftData[0], EventLogger.TAKEOFF, -1);
-			  set_selected_block(0,false);
-			  Button_Takeoff.setSelected(true);
+			  if(event.getAction() == MotionEvent.ACTION_DOWN) {
+			  	  logger.recordTime();
+			  	  logger.startFlight();
+			  	  logger.logEvent(AC_DATA.AircraftData[0], EventLogger.TAKEOFF, -1);
+			  	  set_selected_block(0,false);
+			  	  Button_Takeoff.setSelected(true);
+			  }
 			  return false;
 		  }
 	  });
@@ -342,9 +352,12 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		  @Override
 		  public boolean onTouch(View v, MotionEvent event) {
 			  clear_buttons();
-              if(event.getAction() == MotionEvent.ACTION_DOWN) logger.logEvent(AC_DATA.AircraftData[0], EventLogger.EXECUTE, -1);
-			  Button_Execute.setSelected(true);
-			  set_selected_block(1,false);
+              if(event.getAction() == MotionEvent.ACTION_DOWN) {
+              	  logger.recordTime();
+              	  logger.logEvent(AC_DATA.AircraftData[0], EventLogger.EXECUTE, -1);
+              	  Button_Execute.setSelected(true);
+              	  set_selected_block(1,false);
+			  }
 			  return false;
 		  }
 	  });
@@ -353,9 +366,12 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		  @Override
 		  public boolean onTouch(View v, MotionEvent event) {
 			  clear_buttons();
-              if(event.getAction() == MotionEvent.ACTION_DOWN) logger.logEvent(AC_DATA.AircraftData[0], EventLogger.PAUSE, -1);
-              Button_Pause.setSelected(true);
-			  set_selected_block(2, false);
+              if(event.getAction() == MotionEvent.ACTION_DOWN) {
+              	  logger.recordTime();
+              	  logger.logEvent(AC_DATA.AircraftData[0], EventLogger.PAUSE, -1);
+				  Button_Pause.setSelected(true);
+				  set_selected_block(2, false);
+			  }
 			  return false;
 		  }
 	  });
@@ -364,12 +380,42 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		  @Override
 		  public boolean onTouch(View v, MotionEvent event) {
 			  clear_buttons();
-              if(event.getAction() == MotionEvent.ACTION_DOWN) logger.logEvent(AC_DATA.AircraftData[0], EventLogger.LANDING, -1);
-              set_selected_block(3,false);
-			  Button_LandHere.setSelected(true);
+              if(event.getAction() == MotionEvent.ACTION_DOWN) {
+              	  logger.recordTime();
+              	  logger.logEvent(AC_DATA.AircraftData[0], EventLogger.LANDING, -1);
+				  logger.endFlight();
+				  set_selected_block(3,false);
+				  Button_LandHere.setSelected(true);
+			  }
 			  return false;
 		  }
 	  });
+
+	  	Button_Ready.setOnTouchListener(new View.OnTouchListener() {
+	  	    @Override
+            public boolean onTouch(View v, MotionEvent event) {
+	  	        clear_buttons();
+	  	        if(event.getAction() == MotionEvent.ACTION_DOWN) {
+					set_selected_block(13, false);
+					Button_Ready.setSelected(true);
+				}
+	  	        return false;
+	  	    }
+	  	});
+
+        Button_End.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                clear_buttons();
+                if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                	logger.recordTime();
+                	logger.logEvent(AC_DATA.AircraftData[0], EventLogger.END_ACTIVITY, -1);
+					set_selected_block(14, false);
+					Button_End.setSelected(true);
+				}
+                return false;
+            }
+        });
 
         map_swap.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -381,8 +427,8 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
             }
         });
 
-	  	ChangeVisibleAcButon = (ToggleButton) findViewById(R.id.toggleButtonVisibleAc);
-	  	ChangeVisibleAcButon.setSelected(false);
+	  	ChangeVisibleAcButton = (ToggleButton) findViewById(R.id.toggleButtonVisibleAc);
+	  	ChangeVisibleAcButton.setSelected(false);
 
   	}
 
@@ -517,6 +563,30 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
         //land here
         else if(BlocId == 3){
             send_to_server("PPRZonDroid JUMP_TO_BLOCK " + AC_DATA.AircraftData[AC_DATA.SelAcInd].AC_Id + " " + 10, true);
+        }
+        //ready to start button
+        //open popup window
+        else if(BlocId == 13){
+            LayoutInflater inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View customView = inflater.inflate(R.layout.start_activity_popup, null);
+            final PopupWindow popupWindow = new PopupWindow(customView, 1500, 1000);
+			popupWindow.showAtLocation(customView , Gravity.CENTER, 0, 0);
+            Button startButton = (Button) customView.findViewById(R.id.start_activity);
+            startButton.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent event){
+                	logger.startActivity();
+                	logger.recordTime();
+                	logger.logEvent(AC_DATA.AircraftData[0], EventLogger.START_ACTIVITY, -1);
+                    popupWindow.dismiss();
+                    return false;
+                }
+            });
+        }
+        //end activity button
+        //stop timer/event logger
+        else if(BlocId == 14){
+			logger.endActivity();
         }
     }
 
@@ -1226,7 +1296,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
       return;
     }
 
-    if (ChangeVisibleAcButon.isChecked()) {
+    if (ChangeVisibleAcButton.isChecked()) {
       Toast.makeText(getApplicationContext(), "Showing only " + AC_DATA.AircraftData[AC_DATA.SelAcInd].AC_Name + " markers", Toast.LENGTH_SHORT).show();
       ShowOnlySelected = true;
     } else {

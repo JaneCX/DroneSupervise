@@ -1,6 +1,7 @@
 package com.PPRZonDroid;
 
 import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -28,10 +29,19 @@ public class EventLogger {
     public static final int WAYPOINT_DELETE = 9;
     public static final int WAYPOINT_MOVE = 10;
     public static final int WAYPOINT_ALTITUDE_ADJUST = 11;
+    public static final int START_ACTIVITY = 100;
+    public static final int END_ACTIVITY = 101;
 
     private static final String SD_PATH = "/storage/A9B1-0805/Android/data/com.PPRZonDroid/files/";
+    //private static final String SD_PATH = "This PC/Lenovo TAB 2 A10-70F/Internal storage/Android/data/com.PPRZonDroid/files/";
     private static final LatLng LAB_ORIGIN = new LatLng(36.005417, -78.940984);
+    private File file;
     private FileWriter writer;
+
+    private boolean inFlight;
+    private boolean activityStarted;
+    private long startTime;
+    private long totalTime;
 
     public EventLogger(String filename){
         try {
@@ -39,9 +49,11 @@ public class EventLogger {
             if(!path.exists()){
                 path.mkdir();
             }
-            writer = new FileWriter(
-                    new File(SD_PATH + filename));
+            file = new File(SD_PATH + filename);
+            writer = new FileWriter(file);
             buildFileHeaders();
+            inFlight = false;
+            activityStarted = false;
         } catch (IOException e) {
             Log.d("DroneLogging", "Failed to initialize the file writer.");
             e.printStackTrace();
@@ -75,19 +87,21 @@ public class EventLogger {
             Telemetry.AirCraft aircraft,
             int event,
             float manualCommand) {
-        try {
-            printRequiredInformation(aircraft, event, manualCommand);
-            writer.append("-,"); //waypoint start x
-            writer.append("-,"); //waypoint start y
-            writer.append("-,"); //waypoint start alt
-            writer.append("-,"); //waypoint end x
-            writer.append("-,"); //waypoint end y
-            writer.append("-\n"); //waypoint end alt
-            writer.flush();
+        if (activityStarted) {
+            try {
+                printRequiredInformation(aircraft, event, manualCommand);
+                writer.append("-,"); //waypoint start x
+                writer.append("-,"); //waypoint start y
+                writer.append("-,"); //waypoint start alt
+                writer.append("-,"); //waypoint end x
+                writer.append("-,"); //waypoint end y
+                writer.append("-\n"); //waypoint end alt
+                writer.flush();
 
-        } catch (IOException e) {
-            Log.d("DroneLogging", "Failed to append a new line of data.");
-            e.printStackTrace();
+            } catch (IOException e) {
+                Log.d("DroneLogging", "Failed to append a new line of data.");
+                e.printStackTrace();
+            }
         }
     }
 
@@ -139,22 +153,34 @@ public class EventLogger {
             int event,
             float manualCommand) {
         try {
-            writer.append(Long.toString(System.currentTimeMillis()/1000));
+            writer.append(Long.toString(totalTime));
             writer.append(",");
-            writer.append(aircraft.RawFlightTime);
-            writer.append(",");
-            writer.append(aircraft.RawAltitude);
-            writer.append(",");
-            writer.append(Double.toString(latitude_to_relative_position(aircraft.Position)));
-            writer.append(",");
-            writer.append(Double.toString(longitude_to_relative_position(aircraft.Position)));
-            writer.append(",");
+            if (inFlight){
+                writer.append(aircraft.RawFlightTime);
+                writer.append(",");
+                writer.append(aircraft.RawAltitude);
+                writer.append(",");
+                writer.append(Double.toString(latitude_to_relative_position(aircraft.Position)));
+                writer.append(",");
+                writer.append(Double.toString(longitude_to_relative_position(aircraft.Position)));
+                writer.append(",");
+            }
+            else {
+                writer.append("*");
+                writer.append(",");
+                writer.append("*");
+                writer.append(",");
+                writer.append("*");
+                writer.append(",");
+                writer.append("*");
+                writer.append(",");
+            }
             writer.append(Integer.toString(event));
             writer.append(",");
             writer.append(Float.toString(manualCommand));
             writer.append(",");
-
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             Log.d("DroneLogging", "Failed to append a new line of data.");
             e.printStackTrace();
         }
@@ -168,6 +194,28 @@ public class EventLogger {
     private double longitude_to_relative_position(LatLng latLng){
         return (MainActivity.convert_to_lab(latLng).longitude -
                 MainActivity.convert_to_lab(LAB_ORIGIN).longitude)*29709.19639;
+    }
+
+    //change boolean flag to true, avoid null pointer exception in printing aircraft information
+    protected void startFlight(){
+        inFlight = true;
+    }
+
+    protected void endFlight(){
+        inFlight = false;
+    }
+
+    protected void startActivity(){
+        startTime = SystemClock.elapsedRealtime();
+        activityStarted = true;
+    }
+
+    protected void endActivity(){
+        activityStarted = false;
+    }
+
+    protected void recordTime(){
+        totalTime = SystemClock.elapsedRealtime() - startTime;
     }
 
     protected void closeLogger(){
