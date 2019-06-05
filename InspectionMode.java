@@ -589,11 +589,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 	private GoogleMap mMap_small;
 	private GroundOverlay trueMap; //= MainActivity.trueMap_small;
 	private int mapindex = MainActivity.mapIndex_s;
-	public LinkedList<Marker> mMarkerHead = MainActivity.mMarkerHead_s;
-	public LatLng originalPosition = MainActivity.originalPosition_s;
-	public LinkedList<LatLng> pathPoints = MainActivity.pathPoints_s;
 	public Polyline path = MainActivity.path_s;
-	EventLogger logger_s = MainActivity.logger;
 	private int[] mapImages = {
 			R.drawable.empty_room,
 			R.drawable.check_ride,
@@ -653,67 +649,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 				.position(LAB_ORIGIN, (float) 46)   //note if you change size of map you need to redo this val too
 				.bearing(90.0f));
 //Setup markers drag listeners that update polylines when moved
-		mMap_small.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
-
-			@Override
-			public void onMarkerDragStart(Marker marker) {
-				originalPosition = marker.getPosition();
-				int index = mMarkerHead.indexOf(marker);
-				pathPoints.set(index + 1, marker.getPosition());
-				path.setPoints(pathPoints);
-			}
-
-			public boolean outsideBounds(LatLng latLng){
-				Point currentPoint = mMap_small.getProjection().toScreenLocation(latLng);
-				int x = currentPoint.x;
-				int y = currentPoint.y;
-
-				return x > 1500 || x < 422 || y < 167 || y >922;
-			}
-			@Override
-			public void onMarkerDrag(Marker marker) {
-				if(outsideBounds(marker.getPosition())) marker.setVisible(false);
-				else marker.setVisible(true);
-
-				int index = mMarkerHead.indexOf(marker);
-				pathPoints.set(index + 1, marker.getPosition());
-				path.setPoints(pathPoints);
-			}
-
-			@Override
-			public void onMarkerDragEnd(Marker marker) {
-				if(outsideBounds(marker.getPosition())){
-					int index = mMarkerHead.indexOf(marker);
-					/////////////////////////////////////launch_error_dialog();
-					marker.setPosition(originalPosition);
-					marker.setVisible(true);
-					pathPoints.set(index + 1, marker.getPosition());
-					path.setPoints(pathPoints);
-				}
-				else if(!mMarkerHead.contains(marker)) {
-					// this is code from the original app, works well but we don't want to allow users
-					// to change predesignated waypoints that we choose to show them
-
-					// waypoint_changed(marker.getId(), marker.getPosition(), "Waypoint changed");
-				}
-				//else statement ensures we do not send a paparazzi message for a waypoint that doesn't exist
-				else{
-					logger_s.logWaypointEvent(
-							AC_DATA.AircraftData[0],
-							EventLogger.WAYPOINT_MOVE,
-							-1,
-							originalPosition,
-							marker.getPosition(),
-							marker.getSnippet(),
-							null);
-					//launch_altitude_dialog(marker, "OLD");
-				}
-			}
-		});
-
-
-
-		//listener to add in functionality of adding a waypoint and adding to data structure for
+				//listener to add in functionality of adding a waypoint and adding to data structure for
 		//path execution, I think we don't need this part right?
 		//listener to add in remove on click functionality and altitude control, I think we don't need this part right?
 	}
