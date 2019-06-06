@@ -220,7 +220,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		thumbPad_right = (RelativeLayout)findViewById(R.id.joystick_right);
 		thumbPad_new = (RelativeLayout)findViewById(R.id.layout_joystick_left);
 
-		leftPad = new ThumbPad(thumbPad_left);
+		//leftPad = new ThumbPad(thumbPad_left);
 		rightPad = new ThumbPad(thumbPad_right);
 		leftnew = new ThumbPad(thumbPad_new);
 
@@ -231,6 +231,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 			public boolean onTouch(View v, MotionEvent event) {
 				AC_DATA.inspecting = true;
 				if(event.getAction() == MotionEvent.ACTION_DOWN){
+					MainActivity.logger.recordTime();
 					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_START, leftnew.getRegion(event));
 					mode = 1;
 					if(leftnew.getRegion(event) == ThumbPad.RIGHT){
@@ -247,6 +248,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 					}
 				}
 				else if(event.getAction()== MotionEvent.ACTION_UP) {
+					MainActivity.logger.recordTime();
 					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_END, leftnew.getRegion(event));
 					yaw = 0;
 					throttle = 63;
@@ -271,7 +273,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 
 
 		/////////////////////////////////////////////////////////////
-
+/*
 		thumbPad_left.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -313,12 +315,13 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 					return true;
 			}
 		});
-
+*/
 		thumbPad_right.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				AC_DATA.inspecting = true;
 				if(event.getAction() == MotionEvent.ACTION_DOWN){
+					MainActivity.logger.recordTime();
 					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_START, rightPad.getRegion(event));
 					mode = 1;
 					if(rightPad.getRegion(event) == ThumbPad.RIGHT){
@@ -335,6 +338,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 					}
 				}
 				else if(event.getAction()== MotionEvent.ACTION_UP){
+					MainActivity.logger.recordTime();
 					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_END, rightPad.getRegion(event));
 					pitch = 0;
 					roll = 0;
@@ -381,6 +385,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 
 								@Override
 								public void onFinish() {
+									MainActivity.logger.recordTime();
 									MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_CLOSE, -1);
 									AC_DATA.inspecting = false;
 									AC_DATA.mTcpClient.sendMessage("removeme");

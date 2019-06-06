@@ -306,6 +306,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		  public void onClick(View view) {
 			  if(!isClicked) {
 				  isClicked = true;
+				  logger.recordTime();
                   logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_LAUNCH, -1);
                   send_to_server("PPRZonDroid JUMP_TO_BLOCK " + AcId + " " + 9, true);
 				  new CountDownTimer(1000, 100) {
@@ -707,6 +708,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
              }
                 //else statement ensures we do not send a paparazzi message for a waypoint that doesn't exist
               else{
+				  logger.recordTime();
                   logger.logWaypointEvent(
                           AC_DATA.AircraftData[0],
                           EventLogger.WAYPOINT_MOVE,
@@ -1696,6 +1698,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
                         mMarkerHead.remove(index);
                         pathPoints.remove(index + 1);
                         adjust_marker_lines();
+						logger.recordTime();
                         logger.logWaypointEvent(
                                 AC_DATA.AircraftData[0],
                                 EventLogger.WAYPOINT_DELETE,
@@ -1779,6 +1782,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if(mFlag.equals("OLD")){
+							logger.recordTime();
                             logger.logWaypointEvent(
                                     AC_DATA.AircraftData[0],
                                     EventLogger.WAYPOINT_ALTITUDE_ADJUST,
@@ -1788,6 +1792,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
                                     altMarker.getSnippet(),
                                     altVal.getText().toString());
                         }else{
+							logger.recordTime();
                             logger.logWaypointEvent(
                                     AC_DATA.AircraftData[0],
                                     EventLogger.WAYPOINT_CREATE,
