@@ -51,6 +51,19 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.GroundOverlay;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+
 import org.videolan.libvlc.IVideoPlayer;
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.LibVlcException;
@@ -224,6 +237,8 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		rightPad = new ThumbPad(thumbPad_right);
 		leftnew = new ThumbPad(thumbPad_new);
 
+		//setupmap
+		setupMap();
 		//////////////////////////////////////////////////////////////
 
 		thumbPad_new.setOnTouchListener(new View.OnTouchListener() {
@@ -269,7 +284,6 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 				return true;
 			}
 		});
-
 
 
 		/////////////////////////////////////////////////////////////
@@ -537,7 +551,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 				FlightTimeInspect.setText(AC_DATA.AircraftData[0].FlightTime + " s");
 				AC_DATA.AircraftData[0].ApStatusChanged = false;
 			}
-
+			refresh_markers();
 			if (AC_DATA.AircraftData[0].Altitude_Changed) {
 				AltitudeInspect.setText(AC_DATA.AircraftData[0].Altitude);
 
@@ -570,5 +584,136 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 
 		}
 
+	}
+
+
+	///////////////////////////////////////////////////////////////////add small map///////////
+	private GoogleMap mMap_small;
+	private int mapIndex = 0;
+	private int[] mapImages = {
+			R.drawable.empty_room,
+			R.drawable.check_ride,
+			R.drawable.experiment,
+			R.drawable.check_ride_height,
+			R.drawable.experiment_height};
+	private static final LatLng LAB_ORIGIN = new LatLng(36.005417, -78.940984);
+	private GroundOverlay trueMap;
+
+	private void setupMap(){
+		if (mMap_small == null) {
+			// Try to obtain the map from the SupportMapFragment.
+			mMap_small = ((MapFragment) getFragmentManager()
+					.findFragmentById(R.id.map_small)).getMap();
+			// Check if we were successful in obtaining the map.
+			if (mMap_small != null) {
+				setup_map();
+			}
+		}
+	}
+	private void setup_map() {
+		mMap_small = ((MapFragment) getFragmentManager()
+				.findFragmentById(R.id.map_small)).getMap();
+
+		//initialize map options
+		GoogleMapOptions mMapOptions = new GoogleMapOptions();
+		//Read device settings for Gps usage.
+		mMap_small.setMyLocationEnabled(false);
+
+		//Set map type
+		mMap_small.setMapType(GoogleMap.MAP_TYPE_NONE);
+
+		//Disable zoom and gestures to lock the image in place
+		mMap_small.getUiSettings().setAllGesturesEnabled(false);
+		mMap_small.getUiSettings().setZoomGesturesEnabled(false);
+		mMap_small.getUiSettings().setZoomControlsEnabled(false);
+		mMap_small.getUiSettings().setCompassEnabled(false);
+		mMap_small.getUiSettings().setTiltGesturesEnabled(false);
+		mMap_small.getUiSettings().setMyLocationButtonEnabled(false);
+
+		mMap_small.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+
+		mMap_small.moveCamera(CameraUpdateFactory.newLatLngZoom(LAB_ORIGIN, 50));
+
+		CameraPosition rotated2 = new CameraPosition.Builder()
+				.target(LAB_ORIGIN)
+				.zoom(20)
+				.bearing(90.0f)
+				.build();
+
+		mMap_small.moveCamera(CameraUpdateFactory.newCameraPosition(rotated2));
+
+		BitmapDescriptor labImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+		trueMap = mMap_small.addGroundOverlay(new GroundOverlayOptions()
+				.image(labImage)
+				.position(LAB_ORIGIN, (float) 36.3)   //note if you change size of map you need to redo this val too
+				.bearing(90.0f));
+
+//Setup markers drag listeners that update polylines when moved
+		//listener to add in functionality of adding a waypoint and adding to data structure for
+		//path execution, I think we don't need this part right?
+		//listener to add in remove on click functionality and altitude control, I think we don't need this part right?
+	}
+	private void refresh_markers() {
+		int i;
+
+		for (i = 0; i <= AC_DATA.IndexEnd; i++) {
+
+			//Is AC ready to show on ui?
+			//if (!AC_DATA.AircraftData[i].AC_Enabled)  return;
+
+			if (null == AC_DATA.AircraftData[i].AC_Marker) {
+				add_markers_2_map(i);
+			}
+
+			//Check if ac i visible and its position is changed
+			if (AC_DATA.AircraftData[i].AC_Enabled && AC_DATA.AircraftData[i].isVisible && AC_DATA.AircraftData[i].AC_Position_Changed) {
+				AC_DATA.AircraftData[i].AC_Marker.setPosition(convert_to_lab(AC_DATA.AircraftData[i].Position));
+				AC_DATA.AircraftData[i].AC_Marker.setRotation(Float.parseFloat(AC_DATA.AircraftData[i].Heading));
+				AC_DATA.AircraftData[i].AC_Carrot_Marker.setPosition(convert_to_lab(AC_DATA.AircraftData[i].AC_Carrot_Position));
+				AC_DATA.AircraftData[i].AC_Position_Changed = false;
+			}
+
+		}
+
+		//Check markers, I think we don't need this part right?
+
+		//Handle marker modified msg, I think we don't need this part right?
+
+
+		AC_DATA.ViewChanged = false;
+	}
+
+	private void add_markers_2_map(int AcIndex) {
+
+
+		if (AC_DATA.AircraftData[AcIndex].isVisible && AC_DATA.AircraftData[AcIndex].AC_Enabled) {
+			AC_DATA.AircraftData[AcIndex].AC_Marker = mMap_small.addMarker(new MarkerOptions()
+					.position(convert_to_lab(AC_DATA.AircraftData[AcIndex].Position))
+					.anchor((float) 0.5, (float) 0.5)
+					.flat(true).rotation(Float.parseFloat(AC_DATA.AircraftData[AcIndex].Heading))
+					.title(AC_DATA.AircraftData[AcIndex].AC_Name)
+					.draggable(false)
+					.snippet("STATIC")
+					.icon(BitmapDescriptorFactory.fromBitmap(AC_DATA.AircraftData[AcIndex].AC_Logo))
+			);
+
+			AC_DATA.AircraftData[AcIndex].AC_Carrot_Marker = mMap_small.addMarker(new MarkerOptions()
+					.position(convert_to_lab(AC_DATA.AircraftData[AcIndex].AC_Carrot_Position))
+					.anchor((float) 0.5, (float) 0.5)
+					.draggable(false)
+					.snippet("STATIC")
+					.icon(BitmapDescriptorFactory.fromBitmap(AC_DATA.AircraftData[AcIndex].AC_Carrot_Logo))
+			);
+		}
+	}
+	public static LatLng convert_to_lab(LatLng position){
+		double oldLat = position.latitude;
+		double oldLong = position.longitude;
+
+		double newLat = 5*oldLat - 144.021756;
+		double newLong = 5.35*oldLong+343.3933874;
+
+		LatLng newPosition = new LatLng(newLat, newLong);
+		return newPosition;
 	}
 }

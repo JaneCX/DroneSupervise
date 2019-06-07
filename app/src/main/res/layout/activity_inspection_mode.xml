@@ -157,4 +157,12 @@
         android:layout_alignParentRight="true"
         android:src="@drawable/drone1" />
 
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/map_small"
+        android:layout_width="300dp"
+        android:layout_height="208dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="35dp"
+        android:name="com.google.android.gms.maps.MapFragment"/>
 </RelativeLayout>
