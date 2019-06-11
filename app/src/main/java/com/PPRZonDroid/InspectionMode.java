@@ -29,6 +29,7 @@
 
 package com.PPRZonDroid;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -147,7 +148,6 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		} catch (LibVlcException e){
 			Log.e(TAG, e.toString());
 		}
-
 		mSurface = mSurfaceHolder.getSurface();
 
 		mLibVLC.attachSurface(mSurface, InspectionMode.this);
@@ -666,7 +666,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 			}
 
 			//Check if ac i visible and its position is changed
-			if (AC_DATA.AircraftData[i].AC_Enabled && AC_DATA.AircraftData[i].isVisible && AC_DATA.AircraftData[i].AC_Position_Changed) {
+			else if (AC_DATA.AircraftData[i].AC_Enabled && AC_DATA.AircraftData[i].isVisible && AC_DATA.AircraftData[i].AC_Position_Changed) {
 				AC_DATA.AircraftData[i].AC_Marker.setPosition(convert_to_lab(AC_DATA.AircraftData[i].Position));
 				AC_DATA.AircraftData[i].AC_Marker.setRotation(Float.parseFloat(AC_DATA.AircraftData[i].Heading));
 				AC_DATA.AircraftData[i].AC_Carrot_Marker.setPosition(convert_to_lab(AC_DATA.AircraftData[i].AC_Carrot_Position));
@@ -684,9 +684,10 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 	}
 
 	private void add_markers_2_map(int AcIndex) {
-
-
-		if (AC_DATA.AircraftData[AcIndex].isVisible && AC_DATA.AircraftData[AcIndex].AC_Enabled) {
+		if (AC_DATA.AircraftData[AcIndex].AC_Logo == null) {
+			return;
+		}
+		else if (AC_DATA.AircraftData[AcIndex].isVisible && AC_DATA.AircraftData[AcIndex].AC_Enabled) {
 			AC_DATA.AircraftData[AcIndex].AC_Marker = mMap_small.addMarker(new MarkerOptions()
 					.position(convert_to_lab(AC_DATA.AircraftData[AcIndex].Position))
 					.anchor((float) 0.5, (float) 0.5)
@@ -707,6 +708,9 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		}
 	}
 	public static LatLng convert_to_lab(LatLng position){
+		if(position == null){
+			Log.d("debug position","LatLng position null at convert_to_lab");
+		}
 		double oldLat = position.latitude;
 		double oldLong = position.longitude;
 
@@ -715,5 +719,112 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 
 		LatLng newPosition = new LatLng(newLat, newLong);
 		return newPosition;
+	}
+	///////////////////////////////////////////////
+	boolean ShowOnlySelected = true;
+	AcListAdapter mAcListAdapter;
+	ArrayList<Model> AcList = new ArrayList<Model>();
+
+	//called if different ac is selected in the left menu
+	private void set_selected_ac(int AcInd,boolean centerAC) {
+
+		AC_DATA.SelAcInd = AcInd;
+		//Set Title;
+		setTitle(AC_DATA.AircraftData[AC_DATA.SelAcInd].AC_Name);
+
+		//refresh_block_list();
+		set_marker_visibility();
+
+		for (int i = 0; i <= AC_DATA.IndexEnd; i++) {
+			//Is AC ready to show on ui?
+			//Check if ac i visible and its position is changed
+			if (AC_DATA.AircraftData[i].AC_Enabled && AC_DATA.AircraftData[i].isVisible && AC_DATA.AircraftData[i].AC_Marker != null) {
+
+				AC_DATA.AircraftData[i].AC_Logo = AC_DATA.muiGraphics.create_ac_icon(AC_DATA.AircraftData[i].AC_Type, AC_DATA.AircraftData[i].AC_Color, AC_DATA.GraphicsScaleFactor, (i == AC_DATA.SelAcInd));
+				BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(AC_DATA.AircraftData[i].AC_Logo);
+				AC_DATA.AircraftData[i].AC_Marker.setIcon(bitmapDescriptor);
+
+			}
+		}
+		mAcListAdapter.SelectedInd = AcInd;
+		mAcListAdapter.notifyDataSetChanged();
+		refresh_ac_list();
+	}
+
+	private void refresh_ac_list() {
+		//Create or edit aircraft list
+		int i;
+		for (i = 0; i <= AC_DATA.IndexEnd; i++) {
+
+
+			if (AC_DATA.AircraftData[i].AC_Enabled) {
+				AcList.set(i, new Model(AC_DATA.AircraftData[i].AC_Logo, AC_DATA.AircraftData[i].AC_Name, AC_DATA.AircraftData[i].Battery));
+
+			} else {
+				if (AC_DATA.AircraftData[i].AcReady) {
+					AcList.add(new Model(AC_DATA.AircraftData[i].AC_Logo, AC_DATA.AircraftData[i].AC_Name, AC_DATA.AircraftData[i].Battery));
+					AC_DATA.AircraftData[i].AC_Enabled = true;
+				} else {
+					//AC data is not ready yet this should be
+					return;
+				}
+			}
+		}
+	}
+	//Shows only selected ac markers & hide others
+	private void set_marker_visibility() {
+
+		if (ShowOnlySelected) {
+			show_only_selected_ac();
+		} else {
+			show_all_acs();
+		}
+	}
+
+	//Show all markers
+	private void show_all_acs() {
+
+
+		for (int AcInd = 0; AcInd <= AC_DATA.IndexEnd; AcInd++) {
+
+			for (int WpId = 1; (AC_DATA.AircraftData[AcInd].AC_Enabled && (WpId < AC_DATA.AircraftData[AcInd].NumbOfWps - 1)); WpId++) {
+
+				if ((null == AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker)) continue;
+
+				AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker.setVisible(true);
+
+				if ("_".equals(AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpName.substring(0, 1))) {
+					AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker.setVisible(false);
+				}
+
+			}
+
+		}
+
+	}
+
+	private void show_only_selected_ac() {
+
+
+		for (int AcInd = 0; AcInd <= AC_DATA.IndexEnd; AcInd++) {
+
+			for (int WpId = 1; (AC_DATA.AircraftData[AcInd].AC_Enabled && (WpId < AC_DATA.AircraftData[AcInd].NumbOfWps - 1)); WpId++) {
+
+				if ((null == AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker)) continue;
+
+				if (AcInd == AC_DATA.SelAcInd) {
+					AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker.setVisible(true);
+
+					if ("_".equals(AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpName.substring(0, 1))) {
+						AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker.setVisible(false);
+					}
+
+				} else {
+					AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker.setVisible(false);
+				}
+			}
+
+		}
+
 	}
 }

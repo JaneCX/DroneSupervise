@@ -686,7 +686,7 @@ public class Telemetry {
     //Queue<LatLng> AC_Path;
     ArrayList<LatLng> AC_Path = new ArrayList<LatLng>();
     Polyline Ac_PolLine;
-      PolylineOptions Ac_PolLine_Options;
+    PolylineOptions Ac_PolLine_Options;
     String Altitude;
     String RawAltitude;
     boolean Altitude_Changed = false;

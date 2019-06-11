@@ -592,30 +592,30 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
     }
 
 //called if different ac is selected in the left menu
-  private void set_selected_ac(int AcInd,boolean centerAC) {
+	private void set_selected_ac(int AcInd,boolean centerAC) {
 
-    AC_DATA.SelAcInd = AcInd;
-    //Set Title;
-    setTitle(AC_DATA.AircraftData[AC_DATA.SelAcInd].AC_Name);
+		AC_DATA.SelAcInd = AcInd;
+		//Set Title;
+		setTitle(AC_DATA.AircraftData[AC_DATA.SelAcInd].AC_Name);
 
-    //refresh_block_list();
-    set_marker_visibility();
+		//refresh_block_list();
+		set_marker_visibility();
 
-    for (int i = 0; i <= AC_DATA.IndexEnd; i++) {
-      //Is AC ready to show on ui?
-      //Check if ac i visible and its position is changed
-      if (AC_DATA.AircraftData[i].AC_Enabled && AC_DATA.AircraftData[i].isVisible && AC_DATA.AircraftData[i].AC_Marker != null) {
+		for (int i = 0; i <= AC_DATA.IndexEnd; i++) {
+			//Is AC ready to show on ui?
+			//Check if ac i visible and its position is changed
+			if (AC_DATA.AircraftData[i].AC_Enabled && AC_DATA.AircraftData[i].isVisible && AC_DATA.AircraftData[i].AC_Marker != null) {
 
-        AC_DATA.AircraftData[i].AC_Logo = AC_DATA.muiGraphics.create_ac_icon(AC_DATA.AircraftData[i].AC_Type, AC_DATA.AircraftData[i].AC_Color, AC_DATA.GraphicsScaleFactor, (i == AC_DATA.SelAcInd));
-        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(AC_DATA.AircraftData[i].AC_Logo);
-        AC_DATA.AircraftData[i].AC_Marker.setIcon(bitmapDescriptor);
+				AC_DATA.AircraftData[i].AC_Logo = AC_DATA.muiGraphics.create_ac_icon(AC_DATA.AircraftData[i].AC_Type, AC_DATA.AircraftData[i].AC_Color, AC_DATA.GraphicsScaleFactor, (i == AC_DATA.SelAcInd));
+				BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(AC_DATA.AircraftData[i].AC_Logo);
+				AC_DATA.AircraftData[i].AC_Marker.setIcon(bitmapDescriptor);
 
-      }
-    }
-      mAcListAdapter.SelectedInd = AcInd;
-      mAcListAdapter.notifyDataSetChanged();
-      refresh_ac_list();
-  }
+			}
+		}
+		mAcListAdapter.SelectedInd = AcInd;
+		mAcListAdapter.notifyDataSetChanged();
+		refresh_ac_list();
+	}
 
   //Bound map (if not bounded already)
   private void setup_map_ifneeded() {
@@ -1044,7 +1044,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
         //TcpSettingsChanged = true;
         TelemetryAsyncTask = new ReadTelemetry();
         TelemetryAsyncTask.execute();
-
+        mLibVLC.play();
         if (DisableScreenDim) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     }
@@ -1053,12 +1053,12 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
     protected void onDestroy() {
         super.onDestroy();
         logger.closeLogger();
+		//mLibVLC.stop();
     }
 
   @Override
   protected void onStart() {
     super.onStop();
-
     AppStarted = true;
     MapZoomLevel = AppSettings.getFloat("MapZoomLevel", 16.0f);
 
@@ -1076,56 +1076,58 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 
     @Override
     protected void onResume() {
+        playvideo();
         super.onResume();
+		//
+
         // The following call resumes a paused rendering thread.
         // If you de-allocated graphic objects for onPause()
         // this is a good place to re-allocate them.
         //mGLView.onResume();
     }
 
+	protected void playvideo(){
+		mMediaUrl = "file:///sdcard/DCIM/video1.sdp";
+		mSurfaceView = (SurfaceView) findViewById(R.id.player_surface_small);
+		mSurfaceHolder = mSurfaceView.getHolder();
+
+		mSurfaceFrame = (FrameLayout) findViewById(R.id.player_surface_frame_small);
+		//mMediaUrl = getIntent().getExtras().getString("videoUrl");
+		try {
+			mLibVLC = new LibVLC();
+			mLibVLC.setAout(mLibVLC.AOUT_AUDIOTRACK);
+			mLibVLC.setVout(mLibVLC.VOUT_ANDROID_SURFACE);
+			mLibVLC.setHardwareAcceleration(LibVLC.HW_ACCELERATION_AUTOMATIC);
+			mLibVLC.setChroma("YV12");
+
+			mLibVLC.init(getApplicationContext());
+		} catch (LibVlcException e){
+			Log.e(TAG, e.toString());
+		}
+
+		mSurface = mSurfaceHolder.getSurface();
+
+		mLibVLC.attachSurface(mSurface, MainActivity.this);
+
+		temp_options = mLibVLC.getMediaOptions(0);
+		List<String> options_list = new ArrayList<String>(Arrays.asList(temp_options));
+
+
+		options_list.add(":file-caching=2000");
+		options_list.add(":network-caching=1");
+		options_list.add(":clock-jitter=0");
+		options_list.add("--clock-synchro=1");
+		new_options = options_list.toArray(new String[options_list.size()]);
+
+		mLibVLC.playMRL(mMediaUrl,new_options);
+	}
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     setContentView(R.layout.activity_main);
-/////////////////////////////////////////////////////////////////////////////////////////
-      mMediaUrl = "file:///sdcard/DCIM/video2.sdp";
-      mSurfaceView = (SurfaceView) findViewById(R.id.player_surface_small);
-      mSurfaceHolder = mSurfaceView.getHolder();
-
-      mSurfaceFrame = (FrameLayout) findViewById(R.id.player_surface_frame_small);
-      //mMediaUrl = getIntent().getExtras().getString("videoUrl");
-      try {
-          mLibVLC = new LibVLC();
-          mLibVLC.setAout(mLibVLC.AOUT_AUDIOTRACK);
-          mLibVLC.setVout(mLibVLC.VOUT_ANDROID_SURFACE);
-          mLibVLC.setHardwareAcceleration(LibVLC.HW_ACCELERATION_AUTOMATIC);
-          mLibVLC.setChroma("YV12");
-
-          mLibVLC.init(getApplicationContext());
-      } catch (LibVlcException e){
-          Log.e(TAG, e.toString());
-      }
-
-      mSurface = mSurfaceHolder.getSurface();
-
-      mLibVLC.attachSurface(mSurface, MainActivity.this);
-
-      temp_options = mLibVLC.getMediaOptions(0);
-      List<String> options_list = new ArrayList<String>(Arrays.asList(temp_options));
-
-
-      options_list.add(":file-caching=2000");
-      options_list.add(":network-caching=1");
-      options_list.add(":clock-jitter=0");
-      options_list.add("--clock-synchro=1");
-      new_options = options_list.toArray(new String[options_list.size()]);
-
-      mLibVLC.playMRL(mMediaUrl,new_options);
-      /////////////////////////////////////////////////////////////////////////////
-
-
+	playvideo();
     set_up_app();
 
     if (DisableScreenDim) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
