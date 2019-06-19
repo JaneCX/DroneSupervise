@@ -157,7 +157,7 @@ public class uiGraphics {
     return bmp;
   }
 
-  private Canvas create_selected_canvas(Canvas CanvIn, int AcColor, float GraphicsScaleFactor) {
+  public Canvas create_selected_canvas(Canvas CanvIn, int AcColor, float GraphicsScaleFactor) {
 
     int w = CanvIn.getWidth();
     int h = CanvIn.getHeight();

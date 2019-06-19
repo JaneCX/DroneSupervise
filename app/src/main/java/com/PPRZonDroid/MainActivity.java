@@ -135,6 +135,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.PPRZonDroid.R.id.AcList;
 import static java.lang.Double.parseDouble;
 import android.view.MotionEvent;
 
@@ -159,6 +160,9 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
   	public static final String BLOCK_C_TIMEOUT = "block_change_timeout";
   	public static final String DISABLE_SCREEN_DIM = "disable_screen_dim";
   	public static final String DISPLAY_FLIGHT_INFO = "show_flight_info";
+
+  	///////////////////
+    public static int position_a = 0;
 
   	private static final int MAX_USER_ID = 42;
 
@@ -438,6 +442,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
   private void setup_ac_list() {
       mAcListAdapter = new AcListAdapter(this, generateDataAc());
 
+
       // if extending Activity 2. Get ListView from activity_main.xml
       AcListView = (ListView) findViewById(R.id.AcList);
       View AppControls = getLayoutInflater().inflate(R.layout.appcontrols, null);
@@ -454,6 +459,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
           if (position >= 1) {
            view.setSelected(true);
            set_selected_ac(position - 1,true);
+           position_a = position;
            mDrawerLayout.closeDrawers();
            }
 

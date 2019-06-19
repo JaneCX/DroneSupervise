@@ -33,15 +33,19 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.app.Activity;
 import android.graphics.Color;
@@ -102,8 +106,8 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 	boolean isTaskRunning;
 	private Thread mTCPthread;
 
-	RelativeLayout thumbPad_left, thumbPad_right, thumbPad_new;
-	ThumbPad leftPad, rightPad, leftnew;
+	RelativeLayout thumbPad_right, thumbPad_new;
+	ThumbPad rightPad, leftnew;
 	public Telemetry AC_DATA;
 
 	boolean DEBUG=false;
@@ -219,7 +223,10 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		AC_DATA.ServerIp = "192.168.50.10";
 		AC_DATA.ServerTcpPort = 5010;
 		AC_DATA.UdpListenPort = 5005;
-
+		/////////////////////////////////////////////////////////////////////////////////
+		AC_DATA.DEBUG=DEBUG;
+		AC_DATA.GraphicsScaleFactor = getResources().getDisplayMetrics().density;
+		//////////////////////////////////////////////////////////////////////////////
 		//must prepare class in order to parse udp strings into the aircraft object
 		AC_DATA.prepare_class();
 		AC_DATA.unopened = false;
@@ -234,11 +241,12 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		thumbPad_new = (RelativeLayout)findViewById(R.id.layout_joystick_left);
 
 		//leftPad = new ThumbPad(thumbPad_left);
-		rightPad = new ThumbPad(thumbPad_right);
-		leftnew = new ThumbPad(thumbPad_new);
+		rightPad = new ThumbPad(thumbPad_right,1,2,3,4);
+		leftnew = new ThumbPad(thumbPad_new,5,6,7,8);
 
 		//setupmap
 		setupMap();
+		//setup_ac_list();
 		//////////////////////////////////////////////////////////////
 
 		thumbPad_new.setOnTouchListener(new View.OnTouchListener() {
@@ -249,16 +257,16 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 					MainActivity.logger.recordTime();
 					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_START, leftnew.getRegion(event));
 					mode = 1;
-					if(leftnew.getRegion(event) == ThumbPad.RIGHT){
+					if(leftnew.getRegion(event) == leftnew.getRight()){
 						yaw = 10;
 					}
-					else if(leftnew.getRegion(event) == ThumbPad.LEFT){
+					else if(leftnew.getRegion(event) == leftnew.getLeft()){
 						yaw = -10;
 					}
-					else if(leftnew.getRegion(event) == ThumbPad.UP && belowAltitude()){
+					else if(leftnew.getRegion(event) == leftnew.getUp() && belowAltitude()){
 						throttle = 83;
 					}
-					else if(leftnew.getRegion(event) == ThumbPad.DOWN){
+					else if(leftnew.getRegion(event) == leftnew.getDown()){
 						throttle = 42;
 					}
 				}
@@ -285,51 +293,6 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 			}
 		});
 
-
-		/////////////////////////////////////////////////////////////
-/*
-		thumbPad_left.setOnTouchListener(new View.OnTouchListener() {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				AC_DATA.inspecting = true;
-				if(event.getAction() == MotionEvent.ACTION_DOWN){
-					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_START, leftPad.getRegion(event));
-					mode = 1;
-					if(leftPad.getRegion(event) == ThumbPad.RIGHT){
-						yaw = 10;
-					}
-					else if(leftPad.getRegion(event) == ThumbPad.LEFT){
-						yaw = -10;
-					}
-					else if(leftPad.getRegion(event) == ThumbPad.UP && belowAltitude()){
-						throttle = 83;
-					}
-					else if(leftPad.getRegion(event) == ThumbPad.DOWN){
-						throttle = 42;
-					}
-				}
-				else if(event.getAction()== MotionEvent.ACTION_UP) {
-					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_END, leftPad.getRegion(event));
-					yaw = 0;
-					throttle = 63;
-					new CountDownTimer(1000, 100) {
-						@Override
-						public void onTick(long l) {
-						}
-
-						@Override
-						public void onFinish() {
-							float Altitude = Float.parseFloat(AC_DATA.AircraftData[0].RawAltitude);
-							AC_DATA.SendToTcp = AppPassword + "PPRZonDroid MOVE_WAYPOINT " + AcId  + " 4 " +
-									AC_DATA.AircraftData[0].Position.latitude + " " +
-									AC_DATA.AircraftData[0].Position.longitude + " " + Altitude;
-						}
-					}.start();
-				}
-					return true;
-			}
-		});
-*/
 		thumbPad_right.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -338,16 +301,16 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 					MainActivity.logger.recordTime();
 					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_START, rightPad.getRegion(event));
 					mode = 1;
-					if(rightPad.getRegion(event) == ThumbPad.RIGHT){
+					if(rightPad.getRegion(event) == rightPad.getRight()){
 						roll = 15;
 					}
-					else if(rightPad.getRegion(event) == ThumbPad.LEFT){
+					else if(rightPad.getRegion(event) == rightPad.getLeft()){
 						roll = -15;
 					}
-					else if(rightPad.getRegion(event) == ThumbPad.UP){
+					else if(rightPad.getRegion(event) == rightPad.getUp()){
 						pitch = -15;
 					}
-					else if(rightPad.getRegion(event) == ThumbPad.DOWN){
+					else if(rightPad.getRegion(event) == rightPad.getDown()){
 						pitch = 15;
 					}
 				}
@@ -647,11 +610,6 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 				.image(labImage)
 				.position(LAB_ORIGIN, (float) 36.3)   //note if you change size of map you need to redo this val too
 				.bearing(90.0f));
-
-//Setup markers drag listeners that update polylines when moved
-		//listener to add in functionality of adding a waypoint and adding to data structure for
-		//path execution, I think we don't need this part right?
-		//listener to add in remove on click functionality and altitude control, I think we don't need this part right?
 	}
 	private void refresh_markers() {
 		int i;
@@ -669,24 +627,74 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 			else if (AC_DATA.AircraftData[i].AC_Enabled && AC_DATA.AircraftData[i].isVisible && AC_DATA.AircraftData[i].AC_Position_Changed) {
 				AC_DATA.AircraftData[i].AC_Marker.setPosition(convert_to_lab(AC_DATA.AircraftData[i].Position));
 				AC_DATA.AircraftData[i].AC_Marker.setRotation(Float.parseFloat(AC_DATA.AircraftData[i].Heading));
-				AC_DATA.AircraftData[i].AC_Carrot_Marker.setPosition(convert_to_lab(AC_DATA.AircraftData[i].AC_Carrot_Position));
+				//AC_DATA.AircraftData[i].AC_Carrot_Marker.setPosition(convert_to_lab(AC_DATA.AircraftData[i].AC_Carrot_Position));
 				AC_DATA.AircraftData[i].AC_Position_Changed = false;
 			}
 
 		}
-
-		//Check markers, I think we don't need this part right?
-
-		//Handle marker modified msg, I think we don't need this part right?
-
-
 		AC_DATA.ViewChanged = false;
 	}
+	//////////////////////6_17//////////////////////////
+	public Bitmap create_ac_icon(int ColorType, float GraphicsScaleFactor) {
 
+		int AcColor = ColorType;
+
+		int w = (int) (34 * GraphicsScaleFactor);
+		int h = (int) (34 * GraphicsScaleFactor);
+		Bitmap.Config conf = Bitmap.Config.ARGB_4444; // see other conf types
+		Bitmap bmp = Bitmap.createBitmap(w, h, conf); // this creates a MUTABLE bitmapAircraftData[IndexOfAc].AC_Color
+		Canvas canvas = new Canvas(bmp);
+
+		canvas = AC_DATA.muiGraphics.create_selected_canvas(canvas, AcColor, GraphicsScaleFactor);
+
+
+		//Create rotorcraft logo
+		Paint p = new Paint();
+
+		p.setColor(AcColor);
+
+
+		p.setStyle(Paint.Style.STROKE);
+		//p.setStrokeWidth(2f);
+		p.setAntiAlias(true);
+
+		Path ACpath = new Path();
+		ACpath.moveTo((3 * w / 16), (h / 2));
+		ACpath.addCircle(((3 * w / 16) + 1), (h / 2), ((3 * w / 16) - 2), Path.Direction.CW);
+		ACpath.moveTo((3 * w / 16), (h / 2));
+		ACpath.lineTo((13 * w / 16), (h / 2));
+		ACpath.addCircle((13 * w / 16), (h / 2), ((3 * w / 16) - 2), Path.Direction.CW);
+		ACpath.addCircle((w / 2), (13 * h / 16), ((3 * w / 16) - 2), Path.Direction.CW);
+		ACpath.moveTo((w / 2), (13 * h / 16));
+		ACpath.lineTo((w / 2), (5 * h / 16));
+		ACpath.lineTo((6 * w / 16), (5 * h / 16));
+		ACpath.lineTo((w / 2), (2 * h / 16));
+		ACpath.lineTo((10 * w / 16), (5 * h / 16));
+		ACpath.lineTo((w / 2), (5 * h / 16));
+
+		canvas.drawPath(ACpath, p);
+
+		Paint black = new Paint();
+		black.setColor(Color.BLACK);
+		black.setStyle(Paint.Style.STROKE);
+		black.setStrokeWidth(6f);
+		black.setAntiAlias(true);
+
+		canvas.drawPath(ACpath, black);
+		p.setStrokeWidth(3.5f);
+		canvas.drawPath(ACpath, p);
+		return bmp;
+	}
+///////////////////////////////////////6_17/////////////////
 	private void add_markers_2_map(int AcIndex) {
 		if (AC_DATA.AircraftData[AcIndex].AC_Logo == null) {
+			AC_DATA.AircraftData[AcIndex].AC_Logo = create_ac_icon(Color.RED, AC_DATA.GraphicsScaleFactor_s);
 			return;
 		}
+		else if (AC_DATA.AircraftData[AcIndex].Position == null){
+			return;
+		}
+
 		else if (AC_DATA.AircraftData[AcIndex].isVisible && AC_DATA.AircraftData[AcIndex].AC_Enabled) {
 			AC_DATA.AircraftData[AcIndex].AC_Marker = mMap_small.addMarker(new MarkerOptions()
 					.position(convert_to_lab(AC_DATA.AircraftData[AcIndex].Position))
@@ -697,14 +705,8 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 					.snippet("STATIC")
 					.icon(BitmapDescriptorFactory.fromBitmap(AC_DATA.AircraftData[AcIndex].AC_Logo))
 			);
+			if (AC_DATA.AircraftData[AcIndex].AC_Marker == null) Log.d("checking marker", "marker");
 
-			AC_DATA.AircraftData[AcIndex].AC_Carrot_Marker = mMap_small.addMarker(new MarkerOptions()
-					.position(convert_to_lab(AC_DATA.AircraftData[AcIndex].AC_Carrot_Position))
-					.anchor((float) 0.5, (float) 0.5)
-					.draggable(false)
-					.snippet("STATIC")
-					.icon(BitmapDescriptorFactory.fromBitmap(AC_DATA.AircraftData[AcIndex].AC_Carrot_Logo))
-			);
 		}
 	}
 	public static LatLng convert_to_lab(LatLng position){
@@ -720,111 +722,5 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		LatLng newPosition = new LatLng(newLat, newLong);
 		return newPosition;
 	}
-	///////////////////////////////////////////////
-	boolean ShowOnlySelected = true;
-	AcListAdapter mAcListAdapter;
-	ArrayList<Model> AcList = new ArrayList<Model>();
 
-	//called if different ac is selected in the left menu
-	private void set_selected_ac(int AcInd,boolean centerAC) {
-
-		AC_DATA.SelAcInd = AcInd;
-		//Set Title;
-		setTitle(AC_DATA.AircraftData[AC_DATA.SelAcInd].AC_Name);
-
-		//refresh_block_list();
-		set_marker_visibility();
-
-		for (int i = 0; i <= AC_DATA.IndexEnd; i++) {
-			//Is AC ready to show on ui?
-			//Check if ac i visible and its position is changed
-			if (AC_DATA.AircraftData[i].AC_Enabled && AC_DATA.AircraftData[i].isVisible && AC_DATA.AircraftData[i].AC_Marker != null) {
-
-				AC_DATA.AircraftData[i].AC_Logo = AC_DATA.muiGraphics.create_ac_icon(AC_DATA.AircraftData[i].AC_Type, AC_DATA.AircraftData[i].AC_Color, AC_DATA.GraphicsScaleFactor, (i == AC_DATA.SelAcInd));
-				BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(AC_DATA.AircraftData[i].AC_Logo);
-				AC_DATA.AircraftData[i].AC_Marker.setIcon(bitmapDescriptor);
-
-			}
-		}
-		mAcListAdapter.SelectedInd = AcInd;
-		mAcListAdapter.notifyDataSetChanged();
-		refresh_ac_list();
-	}
-
-	private void refresh_ac_list() {
-		//Create or edit aircraft list
-		int i;
-		for (i = 0; i <= AC_DATA.IndexEnd; i++) {
-
-
-			if (AC_DATA.AircraftData[i].AC_Enabled) {
-				AcList.set(i, new Model(AC_DATA.AircraftData[i].AC_Logo, AC_DATA.AircraftData[i].AC_Name, AC_DATA.AircraftData[i].Battery));
-
-			} else {
-				if (AC_DATA.AircraftData[i].AcReady) {
-					AcList.add(new Model(AC_DATA.AircraftData[i].AC_Logo, AC_DATA.AircraftData[i].AC_Name, AC_DATA.AircraftData[i].Battery));
-					AC_DATA.AircraftData[i].AC_Enabled = true;
-				} else {
-					//AC data is not ready yet this should be
-					return;
-				}
-			}
-		}
-	}
-	//Shows only selected ac markers & hide others
-	private void set_marker_visibility() {
-
-		if (ShowOnlySelected) {
-			show_only_selected_ac();
-		} else {
-			show_all_acs();
-		}
-	}
-
-	//Show all markers
-	private void show_all_acs() {
-
-
-		for (int AcInd = 0; AcInd <= AC_DATA.IndexEnd; AcInd++) {
-
-			for (int WpId = 1; (AC_DATA.AircraftData[AcInd].AC_Enabled && (WpId < AC_DATA.AircraftData[AcInd].NumbOfWps - 1)); WpId++) {
-
-				if ((null == AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker)) continue;
-
-				AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker.setVisible(true);
-
-				if ("_".equals(AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpName.substring(0, 1))) {
-					AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker.setVisible(false);
-				}
-
-			}
-
-		}
-
-	}
-
-	private void show_only_selected_ac() {
-
-
-		for (int AcInd = 0; AcInd <= AC_DATA.IndexEnd; AcInd++) {
-
-			for (int WpId = 1; (AC_DATA.AircraftData[AcInd].AC_Enabled && (WpId < AC_DATA.AircraftData[AcInd].NumbOfWps - 1)); WpId++) {
-
-				if ((null == AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker)) continue;
-
-				if (AcInd == AC_DATA.SelAcInd) {
-					AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker.setVisible(true);
-
-					if ("_".equals(AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpName.substring(0, 1))) {
-						AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker.setVisible(false);
-					}
-
-				} else {
-					AC_DATA.AircraftData[AcInd].AC_Markers[WpId].WpMarker.setVisible(false);
-				}
-			}
-
-		}
-
-	}
 }

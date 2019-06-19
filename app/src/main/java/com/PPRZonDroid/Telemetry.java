@@ -54,7 +54,7 @@ public class Telemetry {
   public int MaxNumbOfWp = 25;    //Max waypoint numb
   public int MaxNumbOfBl = 25;    //Max block number
   public float GraphicsScaleFactor = 1;  //Will be used to resize graphics
-
+  public float GraphicsScaleFactor_s = (float) 0.5;
   //Visual change flags
   public boolean AttitudeChanged = false;
   public boolean NewMarkerAdded = false;

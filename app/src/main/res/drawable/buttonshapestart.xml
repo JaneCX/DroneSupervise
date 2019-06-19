@@ -3,18 +3,10 @@
     <item android:state_selected="true">
         <shape>
             <corners
-                android:radius="20dp"
+                android:radius="3dp"
                 />
-            <!--<gradient-->
-                <!--android:angle="315"-->
-                <!--android:centerX="0%"-->
-                <!--android:centerColor="#1EA83A"-->
-                <!--android:startColor="#E8E8E8"-->
-                <!--android:endColor="#000000"-->
-                <!--android:type="linear"-->
-                <!--/>-->
             <solid
-                android:color="#18A347"
+                android:color="#0D2016"
             />
             <padding
                 android:left="0dp"
@@ -27,15 +19,15 @@
                 android:height="55dp"
                 />
             <stroke
-                android:width="4dp"
-                android:color="#33B5E5"
+                android:width="1dp"
+                android:color="#000000"
                 />
         </shape>
     </item>
     <item android:state_pressed="true">
         <shape>
             <corners
-                android:radius="20dp"
+                android:radius="3dp"
                 />
             <!--<gradient-->
                 <!--android:angle="315"-->
@@ -59,7 +51,7 @@
                 android:height="55dp"
                 />
             <stroke
-                android:width="3dp"
+                android:width="1dp"
                 android:color="#33B5E5"
                 />
         </shape>
@@ -67,19 +59,13 @@
     <item>
         <shape>
             <corners
-                android:radius="20dp"
+                android:radius="3dp"
                 />
-            <!--<gradient-->
-                <!--android:angle="315"-->
-                <!--android:centerX="0%"-->
-                <!--android:centerColor="#1EA83A"-->
-                <!--android:startColor="#E8E8E8"-->
-                <!--android:endColor="#000000"-->
-                <!--android:type="linear"-->
-                <!--/>-->
-            <solid
-                android:color="#18A347"
-                />
+            <gradient
+                android:startColor="#4CAF50"
+                android:endColor="#203820"
+                android:angle="270"
+            />
             <padding
                 android:left="0dp"
                 android:top="0dp"
@@ -91,8 +77,8 @@
                 android:height="55dp"
                 />
             <stroke
-                android:width="3dp"
-                android:color="#8BC34A"
+                android:width="1dp"
+                android:color="#FFFFFF"
                 />
         </shape>
     </item>
