@@ -554,11 +554,11 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 	private GoogleMap mMap_small;
 	private int mapIndex = 0;
 	private int[] mapImages = {
-			R.drawable.empty_room,
-			R.drawable.check_ride,
-			R.drawable.experiment,
-			R.drawable.check_ride_height,
-			R.drawable.experiment_height};
+			R.drawable.map1,
+			R.drawable.map3,
+			R.drawable.map4,
+			R.drawable.map5,
+			R.drawable.map6};
 	private static final LatLng LAB_ORIGIN = new LatLng(36.005417, -78.940984);
 	private GroundOverlay trueMap;
 
@@ -685,6 +685,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		canvas.drawPath(ACpath, p);
 		return bmp;
 	}
+
 ///////////////////////////////////////6_17/////////////////
 	private void add_markers_2_map(int AcIndex) {
 		if (AC_DATA.AircraftData[AcIndex].AC_Logo == null) {

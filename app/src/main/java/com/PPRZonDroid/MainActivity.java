@@ -217,11 +217,11 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
     public LatLng originalPosition;
     private int mapIndex = 0;
     private int[] mapImages = {
-            R.drawable.empty_room,
-            R.drawable.check_ride,
-            R.drawable.experiment,
-            R.drawable.check_ride_height,
-            R.drawable.experiment_height};
+            R.drawable.map1,
+			R.drawable.map3,
+            R.drawable.map4,
+            R.drawable.map5,
+            R.drawable.map6};
     private GroundOverlay trueMap;
 
   	//Establish static socket to be used across activities
@@ -402,7 +402,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 	  	        clear_buttons();
 	  	        if(event.getAction() == MotionEvent.ACTION_DOWN) {
 					set_selected_block(13, false);
-					Button_Ready.setSelected(true);
+					Button_Ready.setVisibility(View.GONE);
 				}
 	  	        return false;
 	  	    }
@@ -578,7 +578,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
             View customView = inflater.inflate(R.layout.start_activity_popup, null);
             final PopupWindow popupWindow = new PopupWindow(customView, 1500, 1000);
 			popupWindow.showAtLocation(customView , Gravity.CENTER, 0, 0);
-            Button startButton = (Button) customView.findViewById(R.id.start_activity);
+            final Button startButton = (Button) customView.findViewById(R.id.start_activity);
             startButton.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent event){
