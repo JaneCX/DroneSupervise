@@ -157,6 +157,7 @@ public class Telemetry {
 
   }
 
+
   /**
    * Method to parse telemetry string.
    *
@@ -284,7 +285,8 @@ public class Telemetry {
 		  AircraftData[AcIndex].AGL = ParsedData[12].substring(0, ParsedData[12].indexOf("."));
 
           Double altVal = Double.parseDouble(ParsedData[10]) + 0.3;
-          AircraftData[AcIndex].RawAltitude = altVal.toString();
+          AircraftData[AcIndex].RawAltitude = ParsedData[10];
+          AircraftData[AcIndex].LoggedAdjustedAltitude = altVal.toString();
           AircraftData[AcIndex].Altitude = altVal.toString().substring(0, altVal.toString().indexOf(".") + 2) + " m";
 
         String BufAirspeed= ParsedData[15].substring(0, ParsedData[15].indexOf(".") + 1);
@@ -689,6 +691,7 @@ public class Telemetry {
     PolylineOptions Ac_PolLine_Options;
     String Altitude;
     String RawAltitude;
+    String LoggedAdjustedAltitude;
     boolean Altitude_Changed = false;
     String AGL;
     LatLng Position;

@@ -29,6 +29,7 @@ public class EventLogger {
     public static final int WAYPOINT_DELETE = 9;
     public static final int WAYPOINT_MOVE = 10;
     public static final int WAYPOINT_ALTITUDE_ADJUST = 11;
+    public static final int NO_EVENT = 12;
     public static final int START_ACTIVITY = 100;
     public static final int END_ACTIVITY = 101;
 
@@ -117,9 +118,11 @@ public class EventLogger {
             printRequiredInformation(aircraft, event, manualCommand);
 
             if(startPosition != null) {
-                writer.append(Double.toString(latitude_to_relative_position(startPosition)));
+                //writer.append(Double.toString(latitude_to_relative_position(startPosition)));
+                writer.append(Double.toString(longitude_to_relative_position_lab(startPosition)));
                 writer.append(",");
-                writer.append(Double.toString(longitude_to_relative_position(startPosition)));
+                //writer.append(Double.toString(longitude_to_relative_position(startPosition)));
+                writer.append(Double.toString(latitude_to_relative_position_lab(startPosition)));
                 writer.append(",");
             }else{
                 writer.append("-,");
@@ -129,9 +132,11 @@ public class EventLogger {
             writer.append(",");
 
             if(endPosition != null) {
-                writer.append(Double.toString(latitude_to_relative_position(endPosition)));
+                //writer.append(Double.toString(latitude_to_relative_position(endPosition)));
+                writer.append(Double.toString(longitude_to_relative_position_lab(endPosition)));
                 writer.append(",");
-                writer.append(Double.toString(longitude_to_relative_position(endPosition)));
+                //writer.append(Double.toString(longitude_to_relative_position(endPosition)));
+                writer.append(Double.toString(latitude_to_relative_position_lab(endPosition)));
                 writer.append(",");
             }else{
                 writer.append("-,");
@@ -158,11 +163,11 @@ public class EventLogger {
             if (inFlight){
                 writer.append(aircraft.RawFlightTime);
                 writer.append(",");
-                writer.append(aircraft.RawAltitude);
-                writer.append(",");
-                writer.append(Double.toString(latitude_to_relative_position(aircraft.Position)));
+                writer.append(aircraft.LoggedAdjustedAltitude);
                 writer.append(",");
                 writer.append(Double.toString(longitude_to_relative_position(aircraft.Position)));
+                writer.append(",");
+                writer.append(Double.toString(latitude_to_relative_position(aircraft.Position)));
                 writer.append(",");
             }
             else {
@@ -188,12 +193,21 @@ public class EventLogger {
 
     private double latitude_to_relative_position(LatLng latLng){
         return (MainActivity.convert_to_lab(latLng).latitude -
-                MainActivity.convert_to_lab(LAB_ORIGIN).latitude)*35879.28814;
+                //MainActivity.convert_to_lab(LAB_ORIGIN).latitude)*35879.28814;
+                MainActivity.convert_to_lab(LAB_ORIGIN).latitude)*20714.99254;
     }
 
     private double longitude_to_relative_position(LatLng latLng){
         return (MainActivity.convert_to_lab(latLng).longitude -
-                MainActivity.convert_to_lab(LAB_ORIGIN).longitude)*29709.19639;
+                //MainActivity.convert_to_lab(LAB_ORIGIN).longitude)*29709.19639;
+                MainActivity.convert_to_lab(LAB_ORIGIN).longitude)*16619.76984;
+    }
+    private double latitude_to_relative_position_lab(LatLng latLng){
+        return (latLng.latitude - MainActivity.convert_to_lab(LAB_ORIGIN).latitude)*20714.99254;
+    }
+
+    private double longitude_to_relative_position_lab(LatLng latLng){
+        return (latLng.longitude - MainActivity.convert_to_lab(LAB_ORIGIN).longitude)*16619.76984;
     }
 
     //change boolean flag to true, avoid null pointer exception in printing aircraft information

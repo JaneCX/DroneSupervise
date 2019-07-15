@@ -264,7 +264,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 						yaw = -10;
 					}
 					else if(leftnew.getRegion(event) == leftnew.getUp() && belowAltitude()){
-						throttle = 83;
+						throttle =83;
 					}
 					else if(leftnew.getRegion(event) == leftnew.getDown()){
 						throttle = 42;
@@ -303,15 +303,21 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 					mode = 1;
 					if(rightPad.getRegion(event) == rightPad.getRight()){
 						roll = 15;
+						//Log.d(TAG, "onTouch: " + "rightPad getRight() pressed (throttle)");
 					}
 					else if(rightPad.getRegion(event) == rightPad.getLeft()){
 						roll = -15;
+						//Log.d(TAG, "onTouch: " + "rightPad getLeft() pressed (throttle)");
 					}
 					else if(rightPad.getRegion(event) == rightPad.getUp()){
 						pitch = -15;
+						//Log.d(TAG, "onTouch: " + "rightPad getUp() pressed (throttle)");
+
 					}
 					else if(rightPad.getRegion(event) == rightPad.getDown()){
 						pitch = 15;
+						//Log.d(TAG, "onTouch: " + "rightPad getDown() pressed (throttle)");
+
 					}
 				}
 				else if(event.getAction()== MotionEvent.ACTION_UP){
@@ -319,6 +325,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_END, rightPad.getRegion(event));
 					pitch = 0;
 					roll = 0;
+					Log.d(TAG, "onTouch: " + "rightPad ACTION_UP detected, before countdown timer (throttle)");
 					new CountDownTimer(1000, 100) {
 						@Override
 						public void onTick(long l) {
@@ -362,8 +369,13 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 
 								@Override
 								public void onFinish() {
+								    //AC_DATA.inspecting = true;
 									MainActivity.logger.recordTime();
 									MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_CLOSE, -1);
+                                    float Altitude = Float.parseFloat(AC_DATA.AircraftData[0].RawAltitude);
+                                    AC_DATA.SendToTcp = AppPassword + "PPRZonDroid MOVE_WAYPOINT " + AcId  + " 4 " +
+                                            AC_DATA.AircraftData[0].Position.latitude + " " +
+                                            AC_DATA.AircraftData[0].Position.longitude + " " + Altitude;
 									AC_DATA.inspecting = false;
 									AC_DATA.mTcpClient.sendMessage("removeme");
 									//TelemetryAsyncTask.isCancelled();
@@ -372,6 +384,10 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 									finish();
 								}
 							}.start();
+                            float Altitude = Float.parseFloat(AC_DATA.AircraftData[0].RawAltitude);
+                            AC_DATA.SendToTcp = AppPassword + "PPRZonDroid MOVE_WAYPOINT " + AcId  + " 4 " +
+                                    AC_DATA.AircraftData[0].Position.latitude + " " +
+                                    AC_DATA.AircraftData[0].Position.longitude + " " + Altitude;
 						}
 					}.start();
 				}
@@ -398,6 +414,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 				if(AC_DATA.inspecting) {
 					AC_DATA.mTcpClient.sendMessage("joyinfo" + " " + mode + " " + throttle + " "
 							+ roll + " " + pitch + " " + yaw);
+					//Log.d(TAG, "doInBackground: (throttle)" + throttle + " and mode:" + mode);
 				}
 
 				//Check if settings changed
@@ -438,6 +455,9 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 				if (AC_DATA.ViewChanged) {
 					publishProgress("ee");
 					AC_DATA.ViewChanged = false;
+				}
+				if(System.currentTimeMillis() % 10 == 0 && MainActivity.logger != null){
+					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.NO_EVENT, -1);
 				}
 			}
 			if (DEBUG) Log.d("PPRZ_info", "Stopping AsyncTask ..");
@@ -552,9 +572,10 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 
 	///////////////////////////////////////////////////////////////////add small map///////////
 	private GoogleMap mMap_small;
-	private int mapIndex = 0;
 	private int[] mapImages = {
+			R.drawable.blank,
 			R.drawable.map1,
+			R.drawable.map2,
 			R.drawable.map3,
 			R.drawable.map4,
 			R.drawable.map5,
@@ -605,7 +626,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 
 		mMap_small.moveCamera(CameraUpdateFactory.newCameraPosition(rotated2));
 
-		BitmapDescriptor labImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+		BitmapDescriptor labImage = BitmapDescriptorFactory.fromResource(mapImages[MainActivity.mapIndex]);
 		trueMap = mMap_small.addGroundOverlay(new GroundOverlayOptions()
 				.image(labImage)
 				.position(LAB_ORIGIN, (float) 36.3)   //note if you change size of map you need to redo this val too
@@ -717,8 +738,8 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		double oldLat = position.latitude;
 		double oldLong = position.longitude;
 
-		double newLat = 5*oldLat - 144.021756;
-		double newLong = 5.35*oldLong+343.3933874;
+		double newLat = 5*oldLat - 144.021756 + 0.000093301610565;
+		double newLong = 5.35*oldLong+343.3933874 - 0.000112485140550;
 
 		LatLng newPosition = new LatLng(newLat, newLong);
 		return newPosition;

@@ -164,7 +164,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
   	///////////////////
     public static int position_a = 0;
 
-  	private static final int MAX_USER_ID = 42;
+  	private static final int MAX_USER_ID = 70;
 
 	public Telemetry AC_DATA;                       //Class to hold&proces AC Telemetry Data
   	boolean ShowOnlySelected = true;
@@ -215,9 +215,11 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
   	public Polyline path;
   	public boolean pathInitialized = false;
     public LatLng originalPosition;
-    private int mapIndex = 0;
+    public static int mapIndex = 0;
     private int[] mapImages = {
+            R.drawable.blank,
             R.drawable.map1,
+			R.drawable.map2,
 			R.drawable.map3,
             R.drawable.map4,
             R.drawable.map5,
@@ -733,6 +735,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
         public void onMapClick(LatLng latLng) {
             Point markerScreenPosition = mMap.getProjection().toScreenLocation(latLng);
             Log.d("location", "x: " + markerScreenPosition.x+ "     y: " + markerScreenPosition.y);
+			Log.d("location", "la: " + latLng.latitude+ "     lo: " + latLng.longitude);
             if(markerScreenPosition.x==1285 || markerScreenPosition.x == 1286 || markerScreenPosition.x == 1284){
                 Log.d("location", "x: " + latLng.latitude+ "     y: " + latLng.longitude + " " + markerScreenPosition.x);
             }
@@ -1450,6 +1453,9 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
           publishProgress("ee");
           AC_DATA.ViewChanged = false;
         }
+        if(System.currentTimeMillis() % 10 == 0 && logger != null){
+			logger.logEvent(AC_DATA.AircraftData[0], EventLogger.NO_EVENT, -1);
+		}
       }
 
       if (DEBUG) Log.d("PPRZ_info", "Stopping AsyncTask ..");
@@ -1642,8 +1648,11 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		double oldLat = position.latitude;
 		double oldLong = position.longitude;
 
-		double newLat = 5*oldLat - 144.021756;
-		double newLong = 5.35*oldLong+343.3933874;
+		double newLat = 5*oldLat - 144.021756 + 0.000093301610565;
+		double newLong = 5.35*oldLong+343.3933874 - 0.000112485140550;
+
+		//double newLat = 5*oldLat - 144.021756;
+		//double newLong = 5.35*oldLong+343.3933874;
 
 		LatLng newPosition = new LatLng(newLat, newLong);
 		return newPosition;
@@ -1655,8 +1664,11 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		double oldLat = position.latitude;
 		double oldLong = position.longitude;
 
-		double newLat = (oldLat + 144.021756)/5;
-		double newLong = (oldLong - 343.3933874)/5.35;
+		double newLat = (oldLat + 144.021756 - 0.000093301610565)/5;
+		double newLong = (oldLong - 343.3933874 + 0.000112485140550)/5.35;
+
+		//double newLat = (oldLat + 144.021756)/5;
+		//double newLong = (oldLong - 343.3933874)/5.35;
 
 		LatLng newPosition = new LatLng(newLat, newLong);
 		return newPosition;
