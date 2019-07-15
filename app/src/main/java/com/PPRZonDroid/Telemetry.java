@@ -54,7 +54,7 @@ public class Telemetry {
   public int MaxNumbOfWp = 25;    //Max waypoint numb
   public int MaxNumbOfBl = 25;    //Max block number
   public float GraphicsScaleFactor = 1;  //Will be used to resize graphics
-
+  public float GraphicsScaleFactor_s = (float) 0.8;
   //Visual change flags
   public boolean AttitudeChanged = false;
   public boolean NewMarkerAdded = false;
@@ -156,6 +156,7 @@ public class Telemetry {
     muiGraphics.create_pfd2(AcPfd, Double.parseDouble(AircraftData[SelAcInd].Roll), Double.parseDouble(AircraftData[SelAcInd].Pitch), Double.parseDouble(AircraftData[SelAcInd].Heading), AircraftData[SelAcInd].Altitude, AircraftData[SelAcInd].Battery, AircraftData[SelAcInd].GpsMode,AircraftData[SelAcInd].AC_DlAlt, GraphicsScaleFactor);
 
   }
+
 
   /**
    * Method to parse telemetry string.
@@ -284,7 +285,8 @@ public class Telemetry {
 		  AircraftData[AcIndex].AGL = ParsedData[12].substring(0, ParsedData[12].indexOf("."));
 
           Double altVal = Double.parseDouble(ParsedData[10]) + 0.3;
-          AircraftData[AcIndex].RawAltitude = altVal.toString();
+          AircraftData[AcIndex].RawAltitude = ParsedData[10];
+          AircraftData[AcIndex].LoggedAdjustedAltitude = altVal.toString();
           AircraftData[AcIndex].Altitude = altVal.toString().substring(0, altVal.toString().indexOf(".") + 2) + " m";
 
         String BufAirspeed= ParsedData[15].substring(0, ParsedData[15].indexOf(".") + 1);
@@ -686,9 +688,10 @@ public class Telemetry {
     //Queue<LatLng> AC_Path;
     ArrayList<LatLng> AC_Path = new ArrayList<LatLng>();
     Polyline Ac_PolLine;
-      PolylineOptions Ac_PolLine_Options;
+    PolylineOptions Ac_PolLine_Options;
     String Altitude;
     String RawAltitude;
+    String LoggedAdjustedAltitude;
     boolean Altitude_Changed = false;
     String AGL;
     LatLng Position;

@@ -135,6 +135,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.PPRZonDroid.R.id.AcList;
 import static java.lang.Double.parseDouble;
 import android.view.MotionEvent;
 
@@ -160,7 +161,10 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
   	public static final String DISABLE_SCREEN_DIM = "disable_screen_dim";
   	public static final String DISPLAY_FLIGHT_INFO = "show_flight_info";
 
-  	private static final int MAX_USER_ID = 42;
+  	///////////////////
+    public static int position_a = 0;
+
+  	private static final int MAX_USER_ID = 70;
 
 	public Telemetry AC_DATA;                       //Class to hold&proces AC Telemetry Data
   	boolean ShowOnlySelected = true;
@@ -211,13 +215,15 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
   	public Polyline path;
   	public boolean pathInitialized = false;
     public LatLng originalPosition;
-    private int mapIndex = 0;
+    public static int mapIndex = 0;
     private int[] mapImages = {
-            R.drawable.empty_room,
-            R.drawable.check_ride,
-            R.drawable.experiment,
-            R.drawable.check_ride_height,
-            R.drawable.experiment_height};
+            R.drawable.blank,
+            R.drawable.map1,
+			R.drawable.map2,
+			R.drawable.map3,
+            R.drawable.map4,
+            R.drawable.map5,
+            R.drawable.map6};
     private GroundOverlay trueMap;
 
   	//Establish static socket to be used across activities
@@ -398,7 +404,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 	  	        clear_buttons();
 	  	        if(event.getAction() == MotionEvent.ACTION_DOWN) {
 					set_selected_block(13, false);
-					Button_Ready.setSelected(true);
+					Button_Ready.setVisibility(View.GONE);
 				}
 	  	        return false;
 	  	    }
@@ -438,6 +444,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
   private void setup_ac_list() {
       mAcListAdapter = new AcListAdapter(this, generateDataAc());
 
+
       // if extending Activity 2. Get ListView from activity_main.xml
       AcListView = (ListView) findViewById(R.id.AcList);
       View AppControls = getLayoutInflater().inflate(R.layout.appcontrols, null);
@@ -454,6 +461,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
           if (position >= 1) {
            view.setSelected(true);
            set_selected_ac(position - 1,true);
+           position_a = position;
            mDrawerLayout.closeDrawers();
            }
 
@@ -572,7 +580,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
             View customView = inflater.inflate(R.layout.start_activity_popup, null);
             final PopupWindow popupWindow = new PopupWindow(customView, 1500, 1000);
 			popupWindow.showAtLocation(customView , Gravity.CENTER, 0, 0);
-            Button startButton = (Button) customView.findViewById(R.id.start_activity);
+            final Button startButton = (Button) customView.findViewById(R.id.start_activity);
             startButton.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent event){
@@ -592,30 +600,30 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
     }
 
 //called if different ac is selected in the left menu
-  private void set_selected_ac(int AcInd,boolean centerAC) {
+	private void set_selected_ac(int AcInd,boolean centerAC) {
 
-    AC_DATA.SelAcInd = AcInd;
-    //Set Title;
-    setTitle(AC_DATA.AircraftData[AC_DATA.SelAcInd].AC_Name);
+		AC_DATA.SelAcInd = AcInd;
+		//Set Title;
+		setTitle(AC_DATA.AircraftData[AC_DATA.SelAcInd].AC_Name);
 
-    //refresh_block_list();
-    set_marker_visibility();
+		//refresh_block_list();
+		set_marker_visibility();
 
-    for (int i = 0; i <= AC_DATA.IndexEnd; i++) {
-      //Is AC ready to show on ui?
-      //Check if ac i visible and its position is changed
-      if (AC_DATA.AircraftData[i].AC_Enabled && AC_DATA.AircraftData[i].isVisible && AC_DATA.AircraftData[i].AC_Marker != null) {
+		for (int i = 0; i <= AC_DATA.IndexEnd; i++) {
+			//Is AC ready to show on ui?
+			//Check if ac i visible and its position is changed
+			if (AC_DATA.AircraftData[i].AC_Enabled && AC_DATA.AircraftData[i].isVisible && AC_DATA.AircraftData[i].AC_Marker != null) {
 
-        AC_DATA.AircraftData[i].AC_Logo = AC_DATA.muiGraphics.create_ac_icon(AC_DATA.AircraftData[i].AC_Type, AC_DATA.AircraftData[i].AC_Color, AC_DATA.GraphicsScaleFactor, (i == AC_DATA.SelAcInd));
-        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(AC_DATA.AircraftData[i].AC_Logo);
-        AC_DATA.AircraftData[i].AC_Marker.setIcon(bitmapDescriptor);
+				AC_DATA.AircraftData[i].AC_Logo = AC_DATA.muiGraphics.create_ac_icon(AC_DATA.AircraftData[i].AC_Type, AC_DATA.AircraftData[i].AC_Color, AC_DATA.GraphicsScaleFactor, (i == AC_DATA.SelAcInd));
+				BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(AC_DATA.AircraftData[i].AC_Logo);
+				AC_DATA.AircraftData[i].AC_Marker.setIcon(bitmapDescriptor);
 
-      }
-    }
-      mAcListAdapter.SelectedInd = AcInd;
-      mAcListAdapter.notifyDataSetChanged();
-      refresh_ac_list();
-  }
+			}
+		}
+		mAcListAdapter.SelectedInd = AcInd;
+		mAcListAdapter.notifyDataSetChanged();
+		refresh_ac_list();
+	}
 
   //Bound map (if not bounded already)
   private void setup_map_ifneeded() {
@@ -727,6 +735,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
         public void onMapClick(LatLng latLng) {
             Point markerScreenPosition = mMap.getProjection().toScreenLocation(latLng);
             Log.d("location", "x: " + markerScreenPosition.x+ "     y: " + markerScreenPosition.y);
+			Log.d("location", "la: " + latLng.latitude+ "     lo: " + latLng.longitude);
             if(markerScreenPosition.x==1285 || markerScreenPosition.x == 1286 || markerScreenPosition.x == 1284){
                 Log.d("location", "x: " + latLng.latitude+ "     y: " + latLng.longitude + " " + markerScreenPosition.x);
             }
@@ -1044,7 +1053,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
         //TcpSettingsChanged = true;
         TelemetryAsyncTask = new ReadTelemetry();
         TelemetryAsyncTask.execute();
-
+        mLibVLC.play();
         if (DisableScreenDim) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     }
@@ -1053,12 +1062,12 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
     protected void onDestroy() {
         super.onDestroy();
         logger.closeLogger();
+		//mLibVLC.stop();
     }
 
   @Override
   protected void onStart() {
     super.onStop();
-
     AppStarted = true;
     MapZoomLevel = AppSettings.getFloat("MapZoomLevel", 16.0f);
 
@@ -1076,56 +1085,58 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 
     @Override
     protected void onResume() {
+        playvideo();
         super.onResume();
+		//
+
         // The following call resumes a paused rendering thread.
         // If you de-allocated graphic objects for onPause()
         // this is a good place to re-allocate them.
         //mGLView.onResume();
     }
 
+	protected void playvideo(){
+		mMediaUrl = "file:///sdcard/DCIM/video1.sdp";
+		mSurfaceView = (SurfaceView) findViewById(R.id.player_surface_small);
+		mSurfaceHolder = mSurfaceView.getHolder();
+
+		mSurfaceFrame = (FrameLayout) findViewById(R.id.player_surface_frame_small);
+		//mMediaUrl = getIntent().getExtras().getString("videoUrl");
+		try {
+			mLibVLC = new LibVLC();
+			mLibVLC.setAout(mLibVLC.AOUT_AUDIOTRACK);
+			mLibVLC.setVout(mLibVLC.VOUT_ANDROID_SURFACE);
+			mLibVLC.setHardwareAcceleration(LibVLC.HW_ACCELERATION_AUTOMATIC);
+			mLibVLC.setChroma("YV12");
+
+			mLibVLC.init(getApplicationContext());
+		} catch (LibVlcException e){
+			Log.e(TAG, e.toString());
+		}
+
+		mSurface = mSurfaceHolder.getSurface();
+
+		mLibVLC.attachSurface(mSurface, MainActivity.this);
+
+		temp_options = mLibVLC.getMediaOptions(0);
+		List<String> options_list = new ArrayList<String>(Arrays.asList(temp_options));
+
+
+		options_list.add(":file-caching=2000");
+		options_list.add(":network-caching=1");
+		options_list.add(":clock-jitter=0");
+		options_list.add("--clock-synchro=1");
+		new_options = options_list.toArray(new String[options_list.size()]);
+
+		mLibVLC.playMRL(mMediaUrl,new_options);
+	}
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     setContentView(R.layout.activity_main);
-/////////////////////////////////////////////////////////////////////////////////////////
-      mMediaUrl = "file:///sdcard/DCIM/video2.sdp";
-      mSurfaceView = (SurfaceView) findViewById(R.id.player_surface_small);
-      mSurfaceHolder = mSurfaceView.getHolder();
-
-      mSurfaceFrame = (FrameLayout) findViewById(R.id.player_surface_frame_small);
-      //mMediaUrl = getIntent().getExtras().getString("videoUrl");
-      try {
-          mLibVLC = new LibVLC();
-          mLibVLC.setAout(mLibVLC.AOUT_AUDIOTRACK);
-          mLibVLC.setVout(mLibVLC.VOUT_ANDROID_SURFACE);
-          mLibVLC.setHardwareAcceleration(LibVLC.HW_ACCELERATION_AUTOMATIC);
-          mLibVLC.setChroma("YV12");
-
-          mLibVLC.init(getApplicationContext());
-      } catch (LibVlcException e){
-          Log.e(TAG, e.toString());
-      }
-
-      mSurface = mSurfaceHolder.getSurface();
-
-      mLibVLC.attachSurface(mSurface, MainActivity.this);
-
-      temp_options = mLibVLC.getMediaOptions(0);
-      List<String> options_list = new ArrayList<String>(Arrays.asList(temp_options));
-
-
-      options_list.add(":file-caching=2000");
-      options_list.add(":network-caching=1");
-      options_list.add(":clock-jitter=0");
-      options_list.add("--clock-synchro=1");
-      new_options = options_list.toArray(new String[options_list.size()]);
-
-      mLibVLC.playMRL(mMediaUrl,new_options);
-      /////////////////////////////////////////////////////////////////////////////
-
-
+	playvideo();
     set_up_app();
 
     if (DisableScreenDim) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -1442,6 +1453,9 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
           publishProgress("ee");
           AC_DATA.ViewChanged = false;
         }
+        if(System.currentTimeMillis() % 10 == 0 && logger != null){
+			logger.logEvent(AC_DATA.AircraftData[0], EventLogger.NO_EVENT, -1);
+		}
       }
 
       if (DEBUG) Log.d("PPRZ_info", "Stopping AsyncTask ..");
@@ -1634,8 +1648,11 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		double oldLat = position.latitude;
 		double oldLong = position.longitude;
 
-		double newLat = 5*oldLat - 144.021756;
-		double newLong = 5.35*oldLong+343.3933874;
+		double newLat = 5*oldLat - 144.021756 + 0.000093301610565;
+		double newLong = 5.35*oldLong+343.3933874 - 0.000112485140550;
+
+		//double newLat = 5*oldLat - 144.021756;
+		//double newLong = 5.35*oldLong+343.3933874;
 
 		LatLng newPosition = new LatLng(newLat, newLong);
 		return newPosition;
@@ -1647,8 +1664,11 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		double oldLat = position.latitude;
 		double oldLong = position.longitude;
 
-		double newLat = (oldLat + 144.021756)/5;
-		double newLong = (oldLong - 343.3933874)/5.35;
+		double newLat = (oldLat + 144.021756 - 0.000093301610565)/5;
+		double newLong = (oldLong - 343.3933874 + 0.000112485140550)/5.35;
+
+		//double newLat = (oldLat + 144.021756)/5;
+		//double newLong = (oldLong - 343.3933874)/5.35;
 
 		LatLng newPosition = new LatLng(newLat, newLong);
 		return newPosition;

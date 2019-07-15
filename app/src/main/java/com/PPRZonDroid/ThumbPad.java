@@ -8,20 +8,25 @@ import android.view.ViewGroup;
  */
 
 public class ThumbPad {
-	protected static final int RIGHT = 1;
-	protected static final int UP = 2;
-	protected static final int LEFT = 3;
-	protected static final int DOWN = 4;
+	private int RIGHT;
+	private int UP;
+	private int LEFT;
+	private int DOWN;
 
 	public ViewGroup.LayoutParams params;
 	private ViewGroup mLayout;
 
 	private float x, y, distance, angle;
 
-	public ThumbPad(ViewGroup layout){
+	 public ThumbPad(ViewGroup layout, int right, int up, int left, int down){
 		mLayout = layout;
 
 		params = mLayout.getLayoutParams();
+
+		RIGHT = right;
+		UP = up;
+		LEFT = left;
+		DOWN = down;
 	}
 
 	public int getRegion(MotionEvent arg1){
@@ -49,5 +54,21 @@ public class ThumbPad {
 		else if(x >= 0 && y < 0)
 			return Math.toDegrees(Math.atan(y / x)) + 360;
 		return 0;
+	}
+
+	public int getRight(){
+	 	return RIGHT;
+	}
+
+	public int getUp(){
+	 	return UP;
+	}
+
+	public int getLeft(){
+	 	return LEFT;
+	}
+
+	public int getDown(){
+	 	return DOWN;
 	}
 }

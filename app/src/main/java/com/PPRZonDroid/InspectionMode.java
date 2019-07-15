@@ -29,18 +29,23 @@
 
 package com.PPRZonDroid;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.app.Activity;
 import android.graphics.Color;
@@ -50,6 +55,19 @@ import android.view.SurfaceView;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.GroundOverlay;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 
 import org.videolan.libvlc.IVideoPlayer;
 import org.videolan.libvlc.LibVLC;
@@ -88,8 +106,8 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 	boolean isTaskRunning;
 	private Thread mTCPthread;
 
-	RelativeLayout thumbPad_left, thumbPad_right, thumbPad_new;
-	ThumbPad leftPad, rightPad, leftnew;
+	RelativeLayout thumbPad_right, thumbPad_new;
+	ThumbPad rightPad, leftnew;
 	public Telemetry AC_DATA;
 
 	boolean DEBUG=false;
@@ -134,7 +152,6 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		} catch (LibVlcException e){
 			Log.e(TAG, e.toString());
 		}
-
 		mSurface = mSurfaceHolder.getSurface();
 
 		mLibVLC.attachSurface(mSurface, InspectionMode.this);
@@ -206,7 +223,10 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		AC_DATA.ServerIp = "192.168.50.10";
 		AC_DATA.ServerTcpPort = 5010;
 		AC_DATA.UdpListenPort = 5005;
-
+		/////////////////////////////////////////////////////////////////////////////////
+		AC_DATA.DEBUG=DEBUG;
+		AC_DATA.GraphicsScaleFactor = getResources().getDisplayMetrics().density;
+		//////////////////////////////////////////////////////////////////////////////
 		//must prepare class in order to parse udp strings into the aircraft object
 		AC_DATA.prepare_class();
 		AC_DATA.unopened = false;
@@ -221,9 +241,12 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		thumbPad_new = (RelativeLayout)findViewById(R.id.layout_joystick_left);
 
 		//leftPad = new ThumbPad(thumbPad_left);
-		rightPad = new ThumbPad(thumbPad_right);
-		leftnew = new ThumbPad(thumbPad_new);
+		rightPad = new ThumbPad(thumbPad_right,1,2,3,4);
+		leftnew = new ThumbPad(thumbPad_new,5,6,7,8);
 
+		//setupmap
+		setupMap();
+		//setup_ac_list();
 		//////////////////////////////////////////////////////////////
 
 		thumbPad_new.setOnTouchListener(new View.OnTouchListener() {
@@ -234,16 +257,16 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 					MainActivity.logger.recordTime();
 					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_START, leftnew.getRegion(event));
 					mode = 1;
-					if(leftnew.getRegion(event) == ThumbPad.RIGHT){
+					if(leftnew.getRegion(event) == leftnew.getRight()){
 						yaw = 10;
 					}
-					else if(leftnew.getRegion(event) == ThumbPad.LEFT){
+					else if(leftnew.getRegion(event) == leftnew.getLeft()){
 						yaw = -10;
 					}
-					else if(leftnew.getRegion(event) == ThumbPad.UP && belowAltitude()){
-						throttle = 83;
+					else if(leftnew.getRegion(event) == leftnew.getUp() && belowAltitude()){
+						throttle =83;
 					}
-					else if(leftnew.getRegion(event) == ThumbPad.DOWN){
+					else if(leftnew.getRegion(event) == leftnew.getDown()){
 						throttle = 42;
 					}
 				}
@@ -270,52 +293,6 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 			}
 		});
 
-
-
-		/////////////////////////////////////////////////////////////
-/*
-		thumbPad_left.setOnTouchListener(new View.OnTouchListener() {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				AC_DATA.inspecting = true;
-				if(event.getAction() == MotionEvent.ACTION_DOWN){
-					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_START, leftPad.getRegion(event));
-					mode = 1;
-					if(leftPad.getRegion(event) == ThumbPad.RIGHT){
-						yaw = 10;
-					}
-					else if(leftPad.getRegion(event) == ThumbPad.LEFT){
-						yaw = -10;
-					}
-					else if(leftPad.getRegion(event) == ThumbPad.UP && belowAltitude()){
-						throttle = 83;
-					}
-					else if(leftPad.getRegion(event) == ThumbPad.DOWN){
-						throttle = 42;
-					}
-				}
-				else if(event.getAction()== MotionEvent.ACTION_UP) {
-					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_END, leftPad.getRegion(event));
-					yaw = 0;
-					throttle = 63;
-					new CountDownTimer(1000, 100) {
-						@Override
-						public void onTick(long l) {
-						}
-
-						@Override
-						public void onFinish() {
-							float Altitude = Float.parseFloat(AC_DATA.AircraftData[0].RawAltitude);
-							AC_DATA.SendToTcp = AppPassword + "PPRZonDroid MOVE_WAYPOINT " + AcId  + " 4 " +
-									AC_DATA.AircraftData[0].Position.latitude + " " +
-									AC_DATA.AircraftData[0].Position.longitude + " " + Altitude;
-						}
-					}.start();
-				}
-					return true;
-			}
-		});
-*/
 		thumbPad_right.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -324,17 +301,23 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 					MainActivity.logger.recordTime();
 					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_START, rightPad.getRegion(event));
 					mode = 1;
-					if(rightPad.getRegion(event) == ThumbPad.RIGHT){
+					if(rightPad.getRegion(event) == rightPad.getRight()){
 						roll = 15;
+						//Log.d(TAG, "onTouch: " + "rightPad getRight() pressed (throttle)");
 					}
-					else if(rightPad.getRegion(event) == ThumbPad.LEFT){
+					else if(rightPad.getRegion(event) == rightPad.getLeft()){
 						roll = -15;
+						//Log.d(TAG, "onTouch: " + "rightPad getLeft() pressed (throttle)");
 					}
-					else if(rightPad.getRegion(event) == ThumbPad.UP){
+					else if(rightPad.getRegion(event) == rightPad.getUp()){
 						pitch = -15;
+						//Log.d(TAG, "onTouch: " + "rightPad getUp() pressed (throttle)");
+
 					}
-					else if(rightPad.getRegion(event) == ThumbPad.DOWN){
+					else if(rightPad.getRegion(event) == rightPad.getDown()){
 						pitch = 15;
+						//Log.d(TAG, "onTouch: " + "rightPad getDown() pressed (throttle)");
+
 					}
 				}
 				else if(event.getAction()== MotionEvent.ACTION_UP){
@@ -342,6 +325,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_COMMAND_END, rightPad.getRegion(event));
 					pitch = 0;
 					roll = 0;
+					Log.d(TAG, "onTouch: " + "rightPad ACTION_UP detected, before countdown timer (throttle)");
 					new CountDownTimer(1000, 100) {
 						@Override
 						public void onTick(long l) {
@@ -385,8 +369,13 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 
 								@Override
 								public void onFinish() {
+								    //AC_DATA.inspecting = true;
 									MainActivity.logger.recordTime();
 									MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.INSPECTION_CLOSE, -1);
+                                    float Altitude = Float.parseFloat(AC_DATA.AircraftData[0].RawAltitude);
+                                    AC_DATA.SendToTcp = AppPassword + "PPRZonDroid MOVE_WAYPOINT " + AcId  + " 4 " +
+                                            AC_DATA.AircraftData[0].Position.latitude + " " +
+                                            AC_DATA.AircraftData[0].Position.longitude + " " + Altitude;
 									AC_DATA.inspecting = false;
 									AC_DATA.mTcpClient.sendMessage("removeme");
 									//TelemetryAsyncTask.isCancelled();
@@ -395,6 +384,10 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 									finish();
 								}
 							}.start();
+                            float Altitude = Float.parseFloat(AC_DATA.AircraftData[0].RawAltitude);
+                            AC_DATA.SendToTcp = AppPassword + "PPRZonDroid MOVE_WAYPOINT " + AcId  + " 4 " +
+                                    AC_DATA.AircraftData[0].Position.latitude + " " +
+                                    AC_DATA.AircraftData[0].Position.longitude + " " + Altitude;
 						}
 					}.start();
 				}
@@ -421,6 +414,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 				if(AC_DATA.inspecting) {
 					AC_DATA.mTcpClient.sendMessage("joyinfo" + " " + mode + " " + throttle + " "
 							+ roll + " " + pitch + " " + yaw);
+					//Log.d(TAG, "doInBackground: (throttle)" + throttle + " and mode:" + mode);
 				}
 
 				//Check if settings changed
@@ -461,6 +455,9 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 				if (AC_DATA.ViewChanged) {
 					publishProgress("ee");
 					AC_DATA.ViewChanged = false;
+				}
+				if(System.currentTimeMillis() % 10 == 0 && MainActivity.logger != null){
+					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.NO_EVENT, -1);
 				}
 			}
 			if (DEBUG) Log.d("PPRZ_info", "Stopping AsyncTask ..");
@@ -537,7 +534,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 				FlightTimeInspect.setText(AC_DATA.AircraftData[0].FlightTime + " s");
 				AC_DATA.AircraftData[0].ApStatusChanged = false;
 			}
-
+			refresh_markers();
 			if (AC_DATA.AircraftData[0].Altitude_Changed) {
 				AltitudeInspect.setText(AC_DATA.AircraftData[0].Altitude);
 
@@ -571,4 +568,181 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		}
 
 	}
+
+
+	///////////////////////////////////////////////////////////////////add small map///////////
+	private GoogleMap mMap_small;
+	private int[] mapImages = {
+			R.drawable.blank,
+			R.drawable.map1,
+			R.drawable.map2,
+			R.drawable.map3,
+			R.drawable.map4,
+			R.drawable.map5,
+			R.drawable.map6};
+	private static final LatLng LAB_ORIGIN = new LatLng(36.005417, -78.940984);
+	private GroundOverlay trueMap;
+
+	private void setupMap(){
+		if (mMap_small == null) {
+			// Try to obtain the map from the SupportMapFragment.
+			mMap_small = ((MapFragment) getFragmentManager()
+					.findFragmentById(R.id.map_small)).getMap();
+			// Check if we were successful in obtaining the map.
+			if (mMap_small != null) {
+				setup_map();
+			}
+		}
+	}
+	private void setup_map() {
+		mMap_small = ((MapFragment) getFragmentManager()
+				.findFragmentById(R.id.map_small)).getMap();
+
+		//initialize map options
+		GoogleMapOptions mMapOptions = new GoogleMapOptions();
+		//Read device settings for Gps usage.
+		mMap_small.setMyLocationEnabled(false);
+
+		//Set map type
+		mMap_small.setMapType(GoogleMap.MAP_TYPE_NONE);
+
+		//Disable zoom and gestures to lock the image in place
+		mMap_small.getUiSettings().setAllGesturesEnabled(false);
+		mMap_small.getUiSettings().setZoomGesturesEnabled(false);
+		mMap_small.getUiSettings().setZoomControlsEnabled(false);
+		mMap_small.getUiSettings().setCompassEnabled(false);
+		mMap_small.getUiSettings().setTiltGesturesEnabled(false);
+		mMap_small.getUiSettings().setMyLocationButtonEnabled(false);
+
+		mMap_small.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+
+		mMap_small.moveCamera(CameraUpdateFactory.newLatLngZoom(LAB_ORIGIN, 50));
+
+		CameraPosition rotated2 = new CameraPosition.Builder()
+				.target(LAB_ORIGIN)
+				.zoom(20)
+				.bearing(90.0f)
+				.build();
+
+		mMap_small.moveCamera(CameraUpdateFactory.newCameraPosition(rotated2));
+
+		BitmapDescriptor labImage = BitmapDescriptorFactory.fromResource(mapImages[MainActivity.mapIndex]);
+		trueMap = mMap_small.addGroundOverlay(new GroundOverlayOptions()
+				.image(labImage)
+				.position(LAB_ORIGIN, (float) 36.3)   //note if you change size of map you need to redo this val too
+				.bearing(90.0f));
+	}
+	private void refresh_markers() {
+		int i;
+
+		for (i = 0; i <= AC_DATA.IndexEnd; i++) {
+
+			//Is AC ready to show on ui?
+			//if (!AC_DATA.AircraftData[i].AC_Enabled)  return;
+
+			if (null == AC_DATA.AircraftData[i].AC_Marker) {
+				add_markers_2_map(i);
+			}
+
+			//Check if ac i visible and its position is changed
+			else if (AC_DATA.AircraftData[i].AC_Enabled && AC_DATA.AircraftData[i].isVisible && AC_DATA.AircraftData[i].AC_Position_Changed) {
+				AC_DATA.AircraftData[i].AC_Marker.setPosition(convert_to_lab(AC_DATA.AircraftData[i].Position));
+				AC_DATA.AircraftData[i].AC_Marker.setRotation(Float.parseFloat(AC_DATA.AircraftData[i].Heading));
+				//AC_DATA.AircraftData[i].AC_Carrot_Marker.setPosition(convert_to_lab(AC_DATA.AircraftData[i].AC_Carrot_Position));
+				AC_DATA.AircraftData[i].AC_Position_Changed = false;
+			}
+
+		}
+		AC_DATA.ViewChanged = false;
+	}
+	//////////////////////6_17//////////////////////////
+	public Bitmap create_ac_icon(int ColorType, float GraphicsScaleFactor) {
+
+		int AcColor = ColorType;
+
+		int w = (int) (34 * GraphicsScaleFactor);
+		int h = (int) (34 * GraphicsScaleFactor);
+		Bitmap.Config conf = Bitmap.Config.ARGB_4444; // see other conf types
+		Bitmap bmp = Bitmap.createBitmap(w, h, conf); // this creates a MUTABLE bitmapAircraftData[IndexOfAc].AC_Color
+		Canvas canvas = new Canvas(bmp);
+
+		canvas = AC_DATA.muiGraphics.create_selected_canvas(canvas, AcColor, GraphicsScaleFactor);
+
+
+		//Create rotorcraft logo
+		Paint p = new Paint();
+
+		p.setColor(AcColor);
+
+
+		p.setStyle(Paint.Style.STROKE);
+		//p.setStrokeWidth(2f);
+		p.setAntiAlias(true);
+
+		Path ACpath = new Path();
+		ACpath.moveTo((3 * w / 16), (h / 2));
+		ACpath.addCircle(((3 * w / 16) + 1), (h / 2), ((3 * w / 16) - 2), Path.Direction.CW);
+		ACpath.moveTo((3 * w / 16), (h / 2));
+		ACpath.lineTo((13 * w / 16), (h / 2));
+		ACpath.addCircle((13 * w / 16), (h / 2), ((3 * w / 16) - 2), Path.Direction.CW);
+		ACpath.addCircle((w / 2), (13 * h / 16), ((3 * w / 16) - 2), Path.Direction.CW);
+		ACpath.moveTo((w / 2), (13 * h / 16));
+		ACpath.lineTo((w / 2), (5 * h / 16));
+		ACpath.lineTo((6 * w / 16), (5 * h / 16));
+		ACpath.lineTo((w / 2), (2 * h / 16));
+		ACpath.lineTo((10 * w / 16), (5 * h / 16));
+		ACpath.lineTo((w / 2), (5 * h / 16));
+
+		canvas.drawPath(ACpath, p);
+
+		Paint black = new Paint();
+		black.setColor(Color.BLACK);
+		black.setStyle(Paint.Style.STROKE);
+		black.setStrokeWidth(6f);
+		black.setAntiAlias(true);
+
+		canvas.drawPath(ACpath, black);
+		p.setStrokeWidth(3.5f);
+		canvas.drawPath(ACpath, p);
+		return bmp;
+	}
+
+///////////////////////////////////////6_17/////////////////
+	private void add_markers_2_map(int AcIndex) {
+		if (AC_DATA.AircraftData[AcIndex].AC_Logo == null) {
+			AC_DATA.AircraftData[AcIndex].AC_Logo = create_ac_icon(Color.RED, AC_DATA.GraphicsScaleFactor_s);
+			return;
+		}
+		else if (AC_DATA.AircraftData[AcIndex].Position == null){
+			return;
+		}
+
+		else if (AC_DATA.AircraftData[AcIndex].isVisible && AC_DATA.AircraftData[AcIndex].AC_Enabled) {
+			AC_DATA.AircraftData[AcIndex].AC_Marker = mMap_small.addMarker(new MarkerOptions()
+					.position(convert_to_lab(AC_DATA.AircraftData[AcIndex].Position))
+					.anchor((float) 0.5, (float) 0.5)
+					.flat(true).rotation(Float.parseFloat(AC_DATA.AircraftData[AcIndex].Heading))
+					.title(AC_DATA.AircraftData[AcIndex].AC_Name)
+					.draggable(false)
+					.snippet("STATIC")
+					.icon(BitmapDescriptorFactory.fromBitmap(AC_DATA.AircraftData[AcIndex].AC_Logo))
+			);
+			if (AC_DATA.AircraftData[AcIndex].AC_Marker == null) Log.d("checking marker", "marker");
+
+		}
+	}
+	public static LatLng convert_to_lab(LatLng position){
+		if(position == null){
+			Log.d("debug position","LatLng position null at convert_to_lab");
+		}
+		double oldLat = position.latitude;
+		double oldLong = position.longitude;
+
+		double newLat = 5*oldLat - 144.021756 + 0.000093301610565;
+		double newLong = 5.35*oldLong+343.3933874 - 0.000112485140550;
+
+		LatLng newPosition = new LatLng(newLat, newLong);
+		return newPosition;
+	}
+
 }
