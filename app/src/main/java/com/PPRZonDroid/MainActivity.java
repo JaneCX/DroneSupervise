@@ -1884,6 +1884,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		moduleSelections.add("Mini-Test_2");
 		moduleSelections.add("Final_Test");
 
+
         ArrayAdapter<String> moduleDataAdapter =
                 new ArrayAdapter<>(
                         this,
