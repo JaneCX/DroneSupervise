@@ -51,7 +51,7 @@ public class EventLogger {
                 path.mkdir();
             }
             file = new File(SD_PATH + filename);
-            writer = new FileWriter(file);
+            writer = new FileWriter(file, true);
             buildFileHeaders();
             inFlight = false;
             activityStarted = false;
