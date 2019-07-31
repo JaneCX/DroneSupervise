@@ -457,6 +457,7 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 					AC_DATA.ViewChanged = false;
 				}
 				if(System.currentTimeMillis() % 10 == 0 && MainActivity.logger != null){
+					MainActivity.logger.recordTime();
 					MainActivity.logger.logEvent(AC_DATA.AircraftData[0], EventLogger.NO_EVENT, -1);
 				}
 			}

@@ -1454,6 +1454,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
           AC_DATA.ViewChanged = false;
         }
         if(System.currentTimeMillis() % 10 == 0 && logger != null){
+        	logger.recordTime();
 			logger.logEvent(AC_DATA.AircraftData[0], EventLogger.NO_EVENT, -1);
 		}
       }
