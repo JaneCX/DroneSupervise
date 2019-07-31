@@ -2,6 +2,7 @@ package com.PPRZonDroid;
 
 import android.os.Environment;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -45,14 +46,22 @@ public class EventLogger {
     private long totalTime;
 
     public EventLogger(String filename){
+        file = new File(SD_PATH + filename);
+
         try {
             File path = new File(SD_PATH);
             if(!path.exists()){
                 path.mkdir();
             }
-            file = new File(SD_PATH + filename);
-            writer = new FileWriter(file, true);
-            buildFileHeaders();
+            //file = new File(SD_PATH + filename);
+            if(!file.exists()) {
+                file.createNewFile();
+                writer = new FileWriter(file, true);
+                buildFileHeaders();
+            }
+            else {
+                writer = new FileWriter(file, true);
+            }
             inFlight = false;
             activityStarted = false;
         } catch (IOException e) {
