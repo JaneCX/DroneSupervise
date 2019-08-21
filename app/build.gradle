@@ -11,6 +11,7 @@ apply plugin: 'android'
 
 repositories {
     mavenCentral()
+    //jcenter()
 }
 
 android {
@@ -38,5 +39,6 @@ dependencies {
     compile 'com.android.support:support-v13:19.0.0'
     compile 'com.android.support.constraint:constraint-layout:+'
     compile "de.mrmaffen:vlc-android-sdk:1.0.6"
+    //compile 'de.mrmaffen:libvlc-android:2.1.12@aar'
     compile 'org.jetbrains:annotations-java5:15.0'
 }

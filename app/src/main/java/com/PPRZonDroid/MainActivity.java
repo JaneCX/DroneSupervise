@@ -65,6 +65,7 @@
 
 package com.PPRZonDroid;
 
+import android.media.MediaDataSource;
 import android.view.ViewGroup.LayoutParams;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -139,9 +140,11 @@ import static com.PPRZonDroid.R.id.AcList;
 import static java.lang.Double.parseDouble;
 import android.view.MotionEvent;
 
+//import org.videolan.libvlc.IVLCVout;
 import org.videolan.libvlc.IVideoPlayer;
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.LibVlcException;
+import org.videolan.libvlc.Media;
 
 
 public class MainActivity extends Activity implements SharedPreferences.OnSharedPreferenceChangeListener, IVideoPlayer {
@@ -1039,7 +1042,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
     //note that we must trigger stop to allow new connection in inspection mode
     AC_DATA.mTcpClient.stopClient();
     isTaskRunning= false;
-
+    //mLibVLC.stop();
     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
   }
@@ -1063,6 +1066,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
         super.onDestroy();
         logger.closeLogger();
 		//mLibVLC.stop();
+
     }
 
   @Override
@@ -1080,7 +1084,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
         // If your OpenGL application is memory intensive,
         // you should consider de-allocating objects that
         // consume significant memory here.
-       // mGLView.onPause();
+       //mLibVLC.pause();
     }
 
     @Override
@@ -1094,12 +1098,14 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
         // this is a good place to re-allocate them.
         //mGLView.onResume();
     }
+    protected void playvideo1(){
 
+
+	}
 	protected void playvideo(){
-		mMediaUrl = "file:///sdcard/DCIM/video1.sdp";
+		mMediaUrl = "file:///sdcard/DCIM/video2.sdp";
 		mSurfaceView = (SurfaceView) findViewById(R.id.player_surface_small);
 		mSurfaceHolder = mSurfaceView.getHolder();
-
 		mSurfaceFrame = (FrameLayout) findViewById(R.id.player_surface_frame_small);
 		//mMediaUrl = getIntent().getExtras().getString("videoUrl");
 		try {
@@ -1121,16 +1127,19 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		temp_options = mLibVLC.getMediaOptions(0);
 		List<String> options_list = new ArrayList<String>(Arrays.asList(temp_options));
 
-
-		options_list.add(":file-caching=2000");
-		options_list.add(":network-caching=1");
+		options_list.add(":file-caching=1500");
+		options_list.add(":network-caching=50");
 		options_list.add(":clock-jitter=0");
-		options_list.add("--clock-synchro=1");
+		options_list.add(":rtsp-tcp");
+		options_list.add("--clock-synchro=0");
+
 		new_options = options_list.toArray(new String[options_list.size()]);
 
 		mLibVLC.playMRL(mMediaUrl,new_options);
-	}
 
+
+
+	}
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -1572,7 +1581,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 
         //For a smooth gui we need refresh only changed gui controls
         refresh_markers();
-
+		//playvideo1();
         if (AC_DATA.AircraftData[AC_DATA.SelAcInd].Altitude_Changed) {
           TextViewAltitude.setText(AC_DATA.AircraftData[AC_DATA.SelAcInd].Altitude);
 
@@ -1737,6 +1746,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 
     //dialog to bring up altitude control when a waypoint is either created or moved
     public void launch_altitude_dialog(Marker marker, String flag){
+
         final Marker altMarker = marker;
         final String mFlag = flag;
         LinearLayout altLayout = new LinearLayout(this);
@@ -1906,6 +1916,35 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
                                 userId.getSelectedItem() + "_" +
                                         experimentalGroups.getSelectedItem() + "_" +
                                         modules.getSelectedItem() + ".csv");
+						if(modules.getSelectedItem().equals("Module_3")|| modules.getSelectedItem().equals("Module_4")){
+							mapIndex = 0;
+							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+							trueMap.setImage(newLabImage);
+						}else if(modules.getSelectedItem().equals("Module_5")) {
+							mapIndex = 1;
+							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+							trueMap.setImage(newLabImage);
+						}else if(modules.getSelectedItem().equals("Practice")) {
+							mapIndex = 2;
+							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+							trueMap.setImage(newLabImage);
+						}else if(modules.getSelectedItem().equals("Check_Ride")) {
+							mapIndex = 3;
+							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+							trueMap.setImage(newLabImage);
+						}else if(modules.getSelectedItem().equals("Mini-Test_1")) {
+							mapIndex = 4;
+							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+							trueMap.setImage(newLabImage);
+						}else if(modules.getSelectedItem().equals("Mini-Test_2")) {
+							mapIndex = 5;
+							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+							trueMap.setImage(newLabImage);
+						}else if(modules.getSelectedItem().equals("Final_Test")) {
+							mapIndex = 6;
+							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+							trueMap.setImage(newLabImage);
+						}
                     }
                 }).create();
         fileDialog.setView(dialogLayout);
@@ -1936,7 +1975,7 @@ private static final String TAG = MainActivity.class.getSimpleName();
     private SurfaceHolder mSurfaceHolder;
     private Surface mSurface = null;
 
-    private LibVLC mLibVLC;
+    public LibVLC mLibVLC;
 
     private String mMediaUrl;
     private String[] temp_options;

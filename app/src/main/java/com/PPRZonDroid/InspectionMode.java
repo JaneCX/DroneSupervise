@@ -160,8 +160,8 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		List<String> options_list = new ArrayList<String>(Arrays.asList(temp_options));
 
 
-		options_list.add(":file-caching=2000");
-		options_list.add(":network-caching=1");
+		options_list.add(":file-caching=1500");
+		options_list.add(":network-caching=80");
 		options_list.add(":clock-jitter=0");
 		options_list.add("--clock-synchro=1");
 		new_options = options_list.toArray(new String[options_list.size()]);
@@ -569,7 +569,6 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		}
 
 	}
-
 
 	///////////////////////////////////////////////////////////////////add small map///////////
 	private GoogleMap mMap_small;
