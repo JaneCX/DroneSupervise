@@ -226,7 +226,12 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 			R.drawable.map3,
             R.drawable.map4,
             R.drawable.map5,
-            R.drawable.map6};
+            R.drawable.map6,
+			R.drawable.map1_2,
+			R.drawable.map2_2,
+			R.drawable.map3_2,
+			R.drawable.map4_2,
+			R.drawable.map5_2};
     private GroundOverlay trueMap;
 
   	//Establish static socket to be used across activities
@@ -1895,7 +1900,6 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		moduleSelections.add("Mini-Test_2");
 		moduleSelections.add("Final_Test");
 
-
         ArrayAdapter<String> moduleDataAdapter =
                 new ArrayAdapter<>(
                         this,
@@ -1903,6 +1907,23 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
                         moduleSelections);
         modules.setAdapter(moduleDataAdapter);
 
+/////////add the week selection/////////////////////////////////////////////////////
+        final Spinner weeks = new Spinner(this);
+        final List<String> weekSelections = new ArrayList<>();
+        weekSelections.add("week_1");
+        weekSelections.add("week_2");
+        weekSelections.add("week_3");
+        weekSelections.add("week_5");
+        weekSelections.add("week_7");
+
+        ArrayAdapter<String> weekDataAdapter =
+                new ArrayAdapter<>(
+                        this,
+                        android.R.layout.simple_spinner_dropdown_item,
+                        weekSelections);
+        weeks.setAdapter(weekDataAdapter);
+///////////////////////////////////////////////////////////////////////////////////
+		dialogLayout.addView(weeks);
         dialogLayout.addView(userId);
         dialogLayout.addView(experimentalGroups);
         dialogLayout.addView(modules);
@@ -1913,37 +1934,71 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         logger = new EventLogger(
-                                userId.getSelectedItem() + "_" +
+                                weeks.getSelectedItem() + "_" +
+										userId.getSelectedItem() + "_" +
                                         experimentalGroups.getSelectedItem() + "_" +
                                         modules.getSelectedItem() + ".csv");
-						if(modules.getSelectedItem().equals("Module_3")|| modules.getSelectedItem().equals("Module_4")){
-							mapIndex = 0;
-							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
-							trueMap.setImage(newLabImage);
-						}else if(modules.getSelectedItem().equals("Module_5")) {
-							mapIndex = 1;
-							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
-							trueMap.setImage(newLabImage);
-						}else if(modules.getSelectedItem().equals("Practice")) {
-							mapIndex = 2;
-							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
-							trueMap.setImage(newLabImage);
-						}else if(modules.getSelectedItem().equals("Check_Ride")) {
-							mapIndex = 3;
-							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
-							trueMap.setImage(newLabImage);
-						}else if(modules.getSelectedItem().equals("Mini-Test_1")) {
-							mapIndex = 4;
-							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
-							trueMap.setImage(newLabImage);
-						}else if(modules.getSelectedItem().equals("Mini-Test_2")) {
-							mapIndex = 5;
-							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
-							trueMap.setImage(newLabImage);
-						}else if(modules.getSelectedItem().equals("Final_Test")) {
-							mapIndex = 6;
-							BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
-							trueMap.setImage(newLabImage);
+						if(weeks.getSelectedItem().equals("week_1")) {
+							if (modules.getSelectedItem().equals("Module_3") || modules.getSelectedItem().equals("Module_4")) {
+								mapIndex = 0;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Module_5")) {
+								mapIndex = 1;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Practice")) {
+								mapIndex = 2;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Check_Ride")) {
+								mapIndex = 3;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Mini-Test_1")) {
+								mapIndex = 4;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Mini-Test_2")) {
+								mapIndex = 5;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Final_Test")) {
+								mapIndex = 6;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							}
+						}
+						else if(weeks.getSelectedItem().equals("week_2")) {
+							if (modules.getSelectedItem().equals("Module_3") || modules.getSelectedItem().equals("Module_4")) {
+								mapIndex = 0;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Module_5")) {
+								mapIndex = 1;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Practice")) {
+								mapIndex = 7;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Check_Ride")) {
+								mapIndex = 8;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Mini-Test_1")) {
+								mapIndex = 9;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Mini-Test_2")) {
+								mapIndex = 10;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Final_Test")) {
+								mapIndex = 11;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							}
 						}
                     }
                 }).create();

@@ -53,7 +53,7 @@ public class Telemetry {
   public int MaxNumbOfAC = 25;   //Max waypoint numb
   public int MaxNumbOfWp = 25;    //Max waypoint numb
   public int MaxNumbOfBl = 25;    //Max block number
-  public float GraphicsScaleFactor = 1;  //Will be used to resize graphics
+  public float GraphicsScaleFactor = (float) 1.5;  //Will be used to resize graphics
   public float GraphicsScaleFactor_s = (float) 0.8;
   //Visual change flags
   public boolean AttitudeChanged = false;
@@ -689,25 +689,25 @@ public class Telemetry {
     ArrayList<LatLng> AC_Path = new ArrayList<LatLng>();
     Polyline Ac_PolLine;
     PolylineOptions Ac_PolLine_Options;
-    String Altitude;
-    String RawAltitude;
-    String LoggedAdjustedAltitude;
+    String Altitude = "0";
+    String RawAltitude = "0";
+    String LoggedAdjustedAltitude = "0";
     boolean Altitude_Changed = false;
-    String AGL;
+    String AGL = "0";
     LatLng Position;
     String Heading = "0";
-    String Speed;
+    String Speed = "0";
     String Roll = "0";
     String Pitch = "0";
-    String Throttle;
+    String Throttle = "0";
     String AirSpeed = "N/A";
     boolean ApStatusChanged = false;
-    String FlightTime;
-    String RawFlightTime;
-    String ApMode;
-    String GpsMode;
-    String StateFilterMode;
-    String Battery;
+    String FlightTime = "0";
+    String RawFlightTime = "0";
+    String ApMode = "0";
+    String GpsMode = "0";
+    String StateFilterMode = "0";
+    String Battery = "0";
     boolean AC_Position_Changed = false;
 
     int NumbOfWps = 1;

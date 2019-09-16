@@ -384,10 +384,25 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 									finish();
 								}
 							}.start();
-                            float Altitude = Float.parseFloat(AC_DATA.AircraftData[0].RawAltitude);
+							/*
+							float Altitude = Float.parseFloat(AC_DATA.AircraftData[0].RawAltitude);
                             AC_DATA.SendToTcp = AppPassword + "PPRZonDroid MOVE_WAYPOINT " + AcId  + " 4 " +
                                     AC_DATA.AircraftData[0].Position.latitude + " " +
                                     AC_DATA.AircraftData[0].Position.longitude + " " + Altitude;
+							*/
+							new CountDownTimer(1000, 100) {
+								@Override
+								public void onTick(long l) {
+								}
+
+								@Override
+								public void onFinish() {
+									float Altitude = Float.parseFloat(AC_DATA.AircraftData[0].RawAltitude);
+									AC_DATA.SendToTcp = AppPassword + "PPRZonDroid MOVE_WAYPOINT " + AcId  + " 4 " +
+											AC_DATA.AircraftData[0].Position.latitude + " " +
+											AC_DATA.AircraftData[0].Position.longitude + " " + Altitude;
+								}
+							}.start();
 						}
 					}.start();
 				}
@@ -579,7 +594,12 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 			R.drawable.map3,
 			R.drawable.map4,
 			R.drawable.map5,
-			R.drawable.map6};
+			R.drawable.map6,
+			R.drawable.map1_2,
+			R.drawable.map2_2,
+			R.drawable.map3_2,
+			R.drawable.map4_2,
+			R.drawable.map5_2};
 	private static final LatLng LAB_ORIGIN = new LatLng(36.005417, -78.940984);
 	private GroundOverlay trueMap;
 
