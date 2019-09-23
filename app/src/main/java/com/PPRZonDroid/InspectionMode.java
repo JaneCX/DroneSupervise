@@ -599,7 +599,11 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 			R.drawable.map2_2,
 			R.drawable.map3_2,
 			R.drawable.map4_2,
-			R.drawable.map5_2};
+			R.drawable.map5_2,
+			R.drawable.map1_3,
+			R.drawable.map2_3,
+			R.drawable.map3_3,
+			R.drawable.map4_3};
 	private static final LatLng LAB_ORIGIN = new LatLng(36.005417, -78.940984);
 	private GroundOverlay trueMap;
 

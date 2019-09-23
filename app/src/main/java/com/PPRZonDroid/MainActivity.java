@@ -231,7 +231,11 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 			R.drawable.map2_2,
 			R.drawable.map3_2,
 			R.drawable.map4_2,
-			R.drawable.map5_2};
+			R.drawable.map5_2,
+			R.drawable.map1_3,
+			R.drawable.map2_3,
+			R.drawable.map3_3,
+			R.drawable.map4_3};
     private GroundOverlay trueMap;
 
   	//Establish static socket to be used across activities
@@ -1996,6 +2000,25 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 								trueMap.setImage(newLabImage);
 							} else if (modules.getSelectedItem().equals("Final_Test")) {
 								mapIndex = 11;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							}
+						}
+						else if(weeks.getSelectedItem().equals("week_3")) {
+							if (modules.getSelectedItem().equals("Practice")) {
+								mapIndex = 12;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Mini-Test_1")) {
+								mapIndex = 13;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Mini-Test_2")) {
+								mapIndex = 14;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Final_Test")) {
+								mapIndex = 15;
 								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
 								trueMap.setImage(newLabImage);
 							}
