@@ -235,7 +235,15 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 			R.drawable.map1_3,
 			R.drawable.map2_3,
 			R.drawable.map3_3,
-			R.drawable.map4_3};
+			R.drawable.map4_3,
+			R.drawable.w5_map1,
+			R.drawable.w5_map2,
+			R.drawable.w5_map3,
+			R.drawable.w5_map4,
+			R.drawable.w7_map1,
+			R.drawable.w7_map2,
+			R.drawable.w7_map3,
+			R.drawable.w7_map4};
     private GroundOverlay trueMap;
 
   	//Establish static socket to be used across activities
@@ -849,7 +857,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
     mMediaPlayer.setDataSource(context, soundUri);
     final AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     //Set volume max!!!
-    audioManager.setStreamVolume(AudioManager.STREAM_SYSTEM, audioManager.getStreamMaxVolume(audioManager.STREAM_SYSTEM), 0);
+    audioManager.setStreamVolume(AudioManager.STREAM_SYSTEM, audioManager.getStreamMaxVolume(AudioManager.STREAM_SYSTEM), 0);
 
     if (audioManager.getStreamVolume(AudioManager.STREAM_SYSTEM) != 0) {
       mMediaPlayer.setAudioStreamType(AudioManager.STREAM_SYSTEM);
@@ -1119,8 +1127,8 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		//mMediaUrl = getIntent().getExtras().getString("videoUrl");
 		try {
 			mLibVLC = new LibVLC();
-			mLibVLC.setAout(mLibVLC.AOUT_AUDIOTRACK);
-			mLibVLC.setVout(mLibVLC.VOUT_ANDROID_SURFACE);
+			mLibVLC.setAout(LibVLC.AOUT_AUDIOTRACK);
+			mLibVLC.setVout(LibVLC.VOUT_ANDROID_SURFACE);
 			mLibVLC.setHardwareAcceleration(LibVLC.HW_ACCELERATION_AUTOMATIC);
 			mLibVLC.setChroma("YV12");
 
@@ -1137,6 +1145,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 		List<String> options_list = new ArrayList<String>(Arrays.asList(temp_options));
 
 		options_list.add(":file-caching=1500");
+//		options_list.add(":network-caching=50");
 		options_list.add(":network-caching=50");
 		options_list.add(":clock-jitter=0");
 		options_list.add(":rtsp-tcp");
@@ -1403,10 +1412,7 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 
     if (AcInd == AC_DATA.SelAcInd) {
       return true;
-    } else if (ShowOnlySelected) {
-      return false;
-    }
-    return true;
+    } else return !ShowOnlySelected;
 
   }
 
@@ -2019,6 +2025,44 @@ public class MainActivity extends Activity implements SharedPreferences.OnShared
 								trueMap.setImage(newLabImage);
 							} else if (modules.getSelectedItem().equals("Final_Test")) {
 								mapIndex = 15;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							}
+						}
+						else if(weeks.getSelectedItem().equals("week_5")) {
+							if (modules.getSelectedItem().equals("Practice")) {
+								mapIndex = 16;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Mini-Test_1")) {
+								mapIndex = 17;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Mini-Test_2")) {
+								mapIndex = 18;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Final_Test")) {
+								mapIndex = 19;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							}
+						}
+						else if(weeks.getSelectedItem().equals("week_7")) {
+							if (modules.getSelectedItem().equals("Practice")) {
+								mapIndex = 20;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Mini-Test_1")) {
+								mapIndex = 21;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Mini-Test_2")) {
+								mapIndex = 22;
+								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
+								trueMap.setImage(newLabImage);
+							} else if (modules.getSelectedItem().equals("Final_Test")) {
+								mapIndex = 23;
 								BitmapDescriptor newLabImage = BitmapDescriptorFactory.fromResource(mapImages[mapIndex]);
 								trueMap.setImage(newLabImage);
 							}

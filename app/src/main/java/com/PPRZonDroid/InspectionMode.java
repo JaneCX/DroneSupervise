@@ -143,8 +143,8 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 		mMediaUrl = getIntent().getExtras().getString("videoUrl");
 		try {
 			mLibVLC = new LibVLC();
-			mLibVLC.setAout(mLibVLC.AOUT_AUDIOTRACK);
-			mLibVLC.setVout(mLibVLC.VOUT_ANDROID_SURFACE);
+			mLibVLC.setAout(LibVLC.AOUT_AUDIOTRACK);
+			mLibVLC.setVout(LibVLC.VOUT_ANDROID_SURFACE);
 			mLibVLC.setHardwareAcceleration(LibVLC.HW_ACCELERATION_AUTOMATIC);
 			mLibVLC.setChroma("YV12");
 
@@ -161,9 +161,10 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 
 
 		options_list.add(":file-caching=1500");
-		options_list.add(":network-caching=80");
+//		options_list.add(":network-caching=80");
+		options_list.add(":network-caching=50");
 		options_list.add(":clock-jitter=0");
-		options_list.add("--clock-synchro=1");
+		options_list.add("--clock-synchro=0");
 		new_options = options_list.toArray(new String[options_list.size()]);
 
 		mLibVLC.playMRL(mMediaUrl,new_options);
@@ -603,7 +604,15 @@ public class InspectionMode extends Activity implements IVideoPlayer {
 			R.drawable.map1_3,
 			R.drawable.map2_3,
 			R.drawable.map3_3,
-			R.drawable.map4_3};
+			R.drawable.map4_3,
+			R.drawable.w5_map1,
+			R.drawable.w5_map2,
+			R.drawable.w5_map3,
+			R.drawable.w5_map4,
+			R.drawable.w7_map1,
+			R.drawable.w7_map2,
+			R.drawable.w7_map3,
+			R.drawable.w7_map4};
 	private static final LatLng LAB_ORIGIN = new LatLng(36.005417, -78.940984);
 	private GroundOverlay trueMap;
 

@@ -78,7 +78,7 @@ public class BlockListAdapter extends ArrayAdapter<BlockModel> {
     titleView.setText(BlockModelArrayList.get(position).getTitle());
 
     // 5. Set block color
-    View BlColorBar = (View)  rowView.findViewById(R.id.bl_color);
+    View BlColorBar = rowView.findViewById(R.id.bl_color);
     BlColorBar.setBackgroundColor(BlColor);
 
     // 6. If item is clicked show clicked item template
